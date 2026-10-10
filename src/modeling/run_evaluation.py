@@ -1,13 +1,17 @@
 """Command-line entry point for the modeling lane (run from the repo root).
 
-Real data:
+Real data from Member 1's package (adapted to Contract A, see adapters.py):
+    python -m src.modeling.run_evaluation --member1-package data \
+        --write-contract-a artifacts/pipe_year.parquet
+
+Any file already in Contract A shape:
     python -m src.modeling.run_evaluation --input artifacts/pipe_year.parquet
 
 Contract B fixture for Members 3 and 4 (synthetic, clearly flagged):
     python -m src.modeling.run_evaluation --synthetic \
         --predictions-out contracts/fixtures/fold_predictions.fixture.parquet \
         --metrics-out contracts/fixtures/metrics.example.json \
-        --write-synthetic-input artifacts/dev/pipe_year.synthetic.parquet
+        --write-contract-a artifacts/dev/pipe_year.synthetic.parquet
 
 Nothing is written unless Contract A, Contract B and metrics.json all validate.
 """
@@ -28,6 +32,7 @@ from .contracts import (
     validate_metrics,
     validate_pipe_year,
 )
+from .adapters import BURN_IN_FIRST_SCORE_YEAR, load_member1_package
 from .evaluate import run_evaluation
 from .synthetic import DEFAULT_SEGMENTS, make_synthetic_pipe_year
 
@@ -36,10 +41,14 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Walk-forward evaluation: Contract A -> Contract B + metrics.json")
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--input", type=Path, help="Contract A parquet (pipe_year)")
+    source.add_argument("--member1-package", type=Path, help="Member 1's data package root, e.g. data")
     source.add_argument("--synthetic", action="store_true", help="use generated development data")
+    parser.add_argument("--first-score-year", type=int, default=BURN_IN_FIRST_SCORE_YEAR,
+                        help="--member1-package only: drop earlier burn-in score years")
     parser.add_argument("--synthetic-segments", type=int, default=DEFAULT_SEGMENTS)
     parser.add_argument("--synthetic-seed", type=int, default=7)
-    parser.add_argument("--write-synthetic-input", type=Path, help="also save the synthetic Contract A used")
+    parser.add_argument("--write-contract-a", "--write-synthetic-input", dest="write_contract_a", type=Path,
+                        help="also save the Contract A frame that was evaluated")
     parser.add_argument("--test-years", type=int, nargs="+", help="default: latest three with enough history")
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--include-ambiguous", action="store_true", help="keep ambiguous histories in the primary panel")
@@ -114,8 +123,8 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     if args.synthetic:
         pipe_year = make_synthetic_pipe_year(n_segments=args.synthetic_segments, seed=args.synthetic_seed)
-        if args.write_synthetic_input:
-            _write_parquet(pipe_year, args.write_synthetic_input)
+    elif args.member1_package:
+        pipe_year = load_member1_package(args.member1_package, first_score_year=args.first_score_year)
     else:
         pipe_year = pd.read_parquet(args.input)
 
@@ -126,6 +135,8 @@ def main(argv=None) -> int:
         for error in report.errors:
             print(f"ERROR (Contract A): {error}", file=sys.stderr)
         return 2
+    if args.write_contract_a:
+        _write_parquet(pipe_year, args.write_contract_a)
 
     try:
         result = run_evaluation(

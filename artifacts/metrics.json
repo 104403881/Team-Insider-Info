@@ -1,0 +1,2164 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-10T07:36:43+00:00",
+  "data_snapshot": "2026-10-10",
+  "is_synthetic": false,
+  "selection_unit": "network_length_fraction",
+  "selection_rule": "within each test_year and method, sort by risk_percentile descending then segment_id ascending; select the longest prefix whose cumulative length_m does not exceed budget x total length_m of that year's eligible segments",
+  "champion_method": "prior_breaks",
+  "champion_selection_rule": "highest mean capture_at_05 across test years among non-random methods; ties (equal to 4 d.p.) go to the simpler method",
+  "candidate_methods": [
+    "oldest",
+    "prior_breaks",
+    "lookup",
+    "logistic"
+  ],
+  "test_years": [
+    2023,
+    2024,
+    2025
+  ],
+  "budgets": [
+    0.01,
+    0.02,
+    0.05,
+    0.1
+  ],
+  "primary_budget": 0.05,
+  "aggregation": {
+    "capture_at_XX": "mean across test years (years without recorded breaks are skipped)",
+    "precision_at_XX": "mean across test years",
+    "observed_non_events_at_XX": "sum across test years"
+  },
+  "methods": {
+    "logistic": {
+      "capture_at_01": 0.049879,
+      "precision_at_01": 0.101614,
+      "observed_non_events_at_01": 71,
+      "capture_at_02": 0.101872,
+      "precision_at_02": 0.088628,
+      "observed_non_events_at_02": 164,
+      "capture_at_05": 0.258273,
+      "precision_at_05": 0.075719,
+      "observed_non_events_at_05": 522,
+      "capture_at_10": 0.481461,
+      "precision_at_10": 0.056894,
+      "observed_non_events_at_10": 1289,
+      "capture_at_05_std": 0.092037,
+      "capture_at_05_min": 0.1875,
+      "capture_at_05_max": 0.362319,
+      "pr_auc_mean": 0.06191,
+      "lift_vs_oldest_at_05": 3.88465,
+      "lift_vs_random_at_05": 9.338428,
+      "years_beating_oldest_at_05": 3
+    },
+    "lookup": {
+      "capture_at_01": 0.031159,
+      "precision_at_01": 0.036554,
+      "observed_non_events_at_01": 132,
+      "capture_at_02": 0.104589,
+      "precision_at_02": 0.060564,
+      "observed_non_events_at_02": 262,
+      "capture_at_05": 0.272222,
+      "precision_at_05": 0.059553,
+      "observed_non_events_at_05": 693,
+      "capture_at_10": 0.522947,
+      "precision_at_10": 0.05161,
+      "observed_non_events_at_10": 1574,
+      "capture_at_05_std": 0.062546,
+      "capture_at_05_min": 0.208333,
+      "capture_at_05_max": 0.333333,
+      "pr_auc_mean": 0.042865,
+      "lift_vs_oldest_at_05": 4.09446,
+      "lift_vs_random_at_05": 9.842795,
+      "years_beating_oldest_at_05": 3
+    },
+    "oldest": {
+      "capture_at_01": 0.016606,
+      "precision_at_01": 0.005556,
+      "observed_non_events_at_01": 530,
+      "capture_at_02": 0.026268,
+      "precision_at_02": 0.005345,
+      "observed_non_events_at_02": 927,
+      "capture_at_05": 0.066486,
+      "precision_at_05": 0.00584,
+      "observed_non_events_at_05": 1869,
+      "capture_at_10": 0.233514,
+      "precision_at_10": 0.010104,
+      "observed_non_events_at_10": 3613,
+      "capture_at_05_std": 0.018798,
+      "capture_at_05_min": 0.05,
+      "capture_at_05_max": 0.086957,
+      "pr_auc_mean": 0.01134,
+      "lift_vs_oldest_at_05": 1.0,
+      "lift_vs_random_at_05": 2.40393,
+      "years_beating_oldest_at_05": 0
+    },
+    "prior_breaks": {
+      "capture_at_01": 0.094867,
+      "precision_at_01": 0.15056,
+      "observed_non_events_at_01": 89,
+      "capture_at_02": 0.126027,
+      "precision_at_02": 0.094595,
+      "observed_non_events_at_02": 201,
+      "capture_at_05": 0.324879,
+      "precision_at_05": 0.080993,
+      "observed_non_events_at_05": 600,
+      "capture_at_10": 0.529167,
+      "precision_at_10": 0.053724,
+      "observed_non_events_at_10": 1527,
+      "capture_at_05_std": 0.071031,
+      "capture_at_05_min": 0.25,
+      "capture_at_05_max": 0.391304,
+      "pr_auc_mean": 0.056409,
+      "lift_vs_oldest_at_05": 4.886467,
+      "lift_vs_random_at_05": 11.746725,
+      "years_beating_oldest_at_05": 3
+    },
+    "random": {
+      "capture_at_01": 0.004831,
+      "precision_at_01": 0.001938,
+      "observed_non_events_at_01": 472,
+      "capture_at_02": 0.014493,
+      "precision_at_02": 0.002907,
+      "observed_non_events_at_02": 985,
+      "capture_at_05": 0.027657,
+      "precision_at_05": 0.00205,
+      "observed_non_events_at_05": 2418,
+      "capture_at_10": 0.060266,
+      "precision_at_10": 0.002001,
+      "observed_non_events_at_10": 4980,
+      "capture_at_05_std": 0.029077,
+      "capture_at_05_min": 0.0,
+      "capture_at_05_max": 0.057971,
+      "pr_auc_mean": 0.003241,
+      "lift_vs_oldest_at_05": 0.415985,
+      "lift_vs_random_at_05": 1.0,
+      "years_beating_oldest_at_05": 0
+    },
+    "champion": {
+      "capture_at_01": 0.094867,
+      "precision_at_01": 0.15056,
+      "observed_non_events_at_01": 89,
+      "capture_at_02": 0.126027,
+      "precision_at_02": 0.094595,
+      "observed_non_events_at_02": 201,
+      "capture_at_05": 0.324879,
+      "precision_at_05": 0.080993,
+      "observed_non_events_at_05": 600,
+      "capture_at_10": 0.529167,
+      "precision_at_10": 0.053724,
+      "observed_non_events_at_10": 1527,
+      "capture_at_05_std": 0.071031,
+      "capture_at_05_min": 0.25,
+      "capture_at_05_max": 0.391304,
+      "pr_auc_mean": 0.056409,
+      "lift_vs_oldest_at_05": 4.886467,
+      "lift_vs_random_at_05": 11.746725,
+      "years_beating_oldest_at_05": 3
+    }
+  },
+  "by_year": {
+    "2023": {
+      "summary": {
+        "eligible_segments": 15608,
+        "network_length_m": 896941.017,
+        "total_breaks": 40
+      },
+      "budget_0.01": {
+        "logistic": {
+          "budget_length_m": 8969.41,
+          "selected_segments": 26,
+          "selected_length_m": 8639.803,
+          "breaks_captured": 2,
+          "total_breaks": 40,
+          "capture": 0.05,
+          "precision": 0.076923,
+          "observed_non_events": 24
+        },
+        "lookup": {
+          "budget_length_m": 8969.41,
+          "selected_segments": 45,
+          "selected_length_m": 8795.825,
+          "breaks_captured": 2,
+          "total_breaks": 40,
+          "capture": 0.05,
+          "precision": 0.044444,
+          "observed_non_events": 43
+        },
+        "oldest": {
+          "budget_length_m": 8969.41,
+          "selected_segments": 173,
+          "selected_length_m": 8961.2,
+          "breaks_captured": 0,
+          "total_breaks": 40,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 173
+        },
+        "prior_breaks": {
+          "budget_length_m": 8969.41,
+          "selected_segments": 34,
+          "selected_length_m": 8700.119,
+          "breaks_captured": 2,
+          "total_breaks": 40,
+          "capture": 0.05,
+          "precision": 0.058824,
+          "observed_non_events": 32
+        },
+        "random": {
+          "budget_length_m": 8969.41,
+          "selected_segments": 154,
+          "selected_length_m": 8848.601,
+          "breaks_captured": 0,
+          "total_breaks": 40,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 154
+        },
+        "champion": {
+          "budget_length_m": 8969.41,
+          "selected_segments": 34,
+          "selected_length_m": 8700.119,
+          "breaks_captured": 2,
+          "total_breaks": 40,
+          "capture": 0.05,
+          "precision": 0.058824,
+          "observed_non_events": 32
+        }
+      },
+      "budget_0.02": {
+        "logistic": {
+          "budget_length_m": 17938.82,
+          "selected_segments": 59,
+          "selected_length_m": 17807.421,
+          "breaks_captured": 4,
+          "total_breaks": 40,
+          "capture": 0.1,
+          "precision": 0.067797,
+          "observed_non_events": 55
+        },
+        "lookup": {
+          "budget_length_m": 17938.82,
+          "selected_segments": 92,
+          "selected_length_m": 17638.549,
+          "breaks_captured": 4,
+          "total_breaks": 40,
+          "capture": 0.1,
+          "precision": 0.043478,
+          "observed_non_events": 88
+        },
+        "oldest": {
+          "budget_length_m": 17938.82,
+          "selected_segments": 309,
+          "selected_length_m": 17610.804,
+          "breaks_captured": 0,
+          "total_breaks": 40,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 309
+        },
+        "prior_breaks": {
+          "budget_length_m": 17938.82,
+          "selected_segments": 74,
+          "selected_length_m": 17818.589,
+          "breaks_captured": 4,
+          "total_breaks": 40,
+          "capture": 0.1,
+          "precision": 0.054054,
+          "observed_non_events": 70
+        },
+        "random": {
+          "budget_length_m": 17938.82,
+          "selected_segments": 326,
+          "selected_length_m": 17736.619,
+          "breaks_captured": 0,
+          "total_breaks": 40,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 326
+        },
+        "champion": {
+          "budget_length_m": 17938.82,
+          "selected_segments": 74,
+          "selected_length_m": 17818.589,
+          "breaks_captured": 4,
+          "total_breaks": 40,
+          "capture": 0.1,
+          "precision": 0.054054,
+          "observed_non_events": 70
+        }
+      },
+      "budget_0.05": {
+        "logistic": {
+          "budget_length_m": 44847.051,
+          "selected_segments": 185,
+          "selected_length_m": 44776.37,
+          "breaks_captured": 9,
+          "total_breaks": 40,
+          "capture": 0.225,
+          "precision": 0.048649,
+          "observed_non_events": 176
+        },
+        "lookup": {
+          "budget_length_m": 44847.051,
+          "selected_segments": 243,
+          "selected_length_m": 44667.179,
+          "breaks_captured": 11,
+          "total_breaks": 40,
+          "capture": 0.275,
+          "precision": 0.045267,
+          "observed_non_events": 232
+        },
+        "oldest": {
+          "budget_length_m": 44847.051,
+          "selected_segments": 623,
+          "selected_length_m": 44817.041,
+          "breaks_captured": 2,
+          "total_breaks": 40,
+          "capture": 0.05,
+          "precision": 0.00321,
+          "observed_non_events": 621
+        },
+        "prior_breaks": {
+          "budget_length_m": 44847.051,
+          "selected_segments": 216,
+          "selected_length_m": 44811.342,
+          "breaks_captured": 10,
+          "total_breaks": 40,
+          "capture": 0.25,
+          "precision": 0.046296,
+          "observed_non_events": 206
+        },
+        "random": {
+          "budget_length_m": 44847.051,
+          "selected_segments": 801,
+          "selected_length_m": 44816.258,
+          "breaks_captured": 1,
+          "total_breaks": 40,
+          "capture": 0.025,
+          "precision": 0.001248,
+          "observed_non_events": 800
+        },
+        "champion": {
+          "budget_length_m": 44847.051,
+          "selected_segments": 216,
+          "selected_length_m": 44811.342,
+          "breaks_captured": 10,
+          "total_breaks": 40,
+          "capture": 0.25,
+          "precision": 0.046296,
+          "observed_non_events": 206
+        }
+      },
+      "budget_0.10": {
+        "logistic": {
+          "budget_length_m": 89694.102,
+          "selected_segments": 448,
+          "selected_length_m": 89535.975,
+          "breaks_captured": 16,
+          "total_breaks": 40,
+          "capture": 0.4,
+          "precision": 0.035714,
+          "observed_non_events": 432
+        },
+        "lookup": {
+          "budget_length_m": 89694.102,
+          "selected_segments": 548,
+          "selected_length_m": 89444.522,
+          "breaks_captured": 15,
+          "total_breaks": 40,
+          "capture": 0.375,
+          "precision": 0.027372,
+          "observed_non_events": 533
+        },
+        "oldest": {
+          "budget_length_m": 89694.102,
+          "selected_segments": 1187,
+          "selected_length_m": 89597.268,
+          "breaks_captured": 9,
+          "total_breaks": 40,
+          "capture": 0.225,
+          "precision": 0.007582,
+          "observed_non_events": 1178
+        },
+        "prior_breaks": {
+          "budget_length_m": 89694.102,
+          "selected_segments": 532,
+          "selected_length_m": 89490.299,
+          "breaks_captured": 16,
+          "total_breaks": 40,
+          "capture": 0.4,
+          "precision": 0.030075,
+          "observed_non_events": 516
+        },
+        "random": {
+          "budget_length_m": 89694.102,
+          "selected_segments": 1642,
+          "selected_length_m": 89583.202,
+          "breaks_captured": 1,
+          "total_breaks": 40,
+          "capture": 0.025,
+          "precision": 0.000609,
+          "observed_non_events": 1641
+        },
+        "champion": {
+          "budget_length_m": 89694.102,
+          "selected_segments": 532,
+          "selected_length_m": 89490.299,
+          "breaks_captured": 16,
+          "total_breaks": 40,
+          "capture": 0.4,
+          "precision": 0.030075,
+          "observed_non_events": 516
+        }
+      },
+      "pr_auc": {
+        "logistic": 0.038981,
+        "lookup": 0.026766,
+        "oldest": 0.007617,
+        "prior_breaks": 0.023494,
+        "random": 0.002297,
+        "champion": 0.023494
+      }
+    },
+    "2024": {
+      "summary": {
+        "eligible_segments": 15777,
+        "network_length_m": 905363.557,
+        "total_breaks": 48
+      },
+      "budget_0.01": {
+        "logistic": {
+          "budget_length_m": 9053.636,
+          "selected_segments": 27,
+          "selected_length_m": 8845.482,
+          "breaks_captured": 2,
+          "total_breaks": 48,
+          "capture": 0.041667,
+          "precision": 0.074074,
+          "observed_non_events": 25
+        },
+        "lookup": {
+          "budget_length_m": 9053.636,
+          "selected_segments": 46,
+          "selected_length_m": 9038.181,
+          "breaks_captured": 0,
+          "total_breaks": 48,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 46
+        },
+        "oldest": {
+          "budget_length_m": 9053.636,
+          "selected_segments": 180,
+          "selected_length_m": 9023.062,
+          "breaks_captured": 1,
+          "total_breaks": 48,
+          "capture": 0.020833,
+          "precision": 0.005556,
+          "observed_non_events": 179
+        },
+        "prior_breaks": {
+          "budget_length_m": 9053.636,
+          "selected_segments": 35,
+          "selected_length_m": 8766.408,
+          "breaks_captured": 5,
+          "total_breaks": 48,
+          "capture": 0.104167,
+          "precision": 0.142857,
+          "observed_non_events": 30
+        },
+        "random": {
+          "budget_length_m": 9053.636,
+          "selected_segments": 147,
+          "selected_length_m": 9040.509,
+          "breaks_captured": 0,
+          "total_breaks": 48,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 147
+        },
+        "champion": {
+          "budget_length_m": 9053.636,
+          "selected_segments": 35,
+          "selected_length_m": 8766.408,
+          "breaks_captured": 5,
+          "total_breaks": 48,
+          "capture": 0.104167,
+          "precision": 0.142857,
+          "observed_non_events": 30
+        }
+      },
+      "budget_0.02": {
+        "logistic": {
+          "budget_length_m": 18107.271,
+          "selected_segments": 60,
+          "selected_length_m": 18090.976,
+          "breaks_captured": 5,
+          "total_breaks": 48,
+          "capture": 0.104167,
+          "precision": 0.083333,
+          "observed_non_events": 55
+        },
+        "lookup": {
+          "budget_length_m": 18107.271,
+          "selected_segments": 92,
+          "selected_length_m": 18008.773,
+          "breaks_captured": 4,
+          "total_breaks": 48,
+          "capture": 0.083333,
+          "precision": 0.043478,
+          "observed_non_events": 88
+        },
+        "oldest": {
+          "budget_length_m": 18107.271,
+          "selected_segments": 311,
+          "selected_length_m": 18087.814,
+          "breaks_captured": 1,
+          "total_breaks": 48,
+          "capture": 0.020833,
+          "precision": 0.003215,
+          "observed_non_events": 310
+        },
+        "prior_breaks": {
+          "budget_length_m": 18107.271,
+          "selected_segments": 74,
+          "selected_length_m": 17889.132,
+          "breaks_captured": 5,
+          "total_breaks": 48,
+          "capture": 0.104167,
+          "precision": 0.067568,
+          "observed_non_events": 69
+        },
+        "random": {
+          "budget_length_m": 18107.271,
+          "selected_segments": 318,
+          "selected_length_m": 18057.198,
+          "breaks_captured": 0,
+          "total_breaks": 48,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 318
+        },
+        "champion": {
+          "budget_length_m": 18107.271,
+          "selected_segments": 74,
+          "selected_length_m": 17889.132,
+          "breaks_captured": 5,
+          "total_breaks": 48,
+          "capture": 0.104167,
+          "precision": 0.067568,
+          "observed_non_events": 69
+        }
+      },
+      "budget_0.05": {
+        "logistic": {
+          "budget_length_m": 45268.178,
+          "selected_segments": 189,
+          "selected_length_m": 45223.685,
+          "breaks_captured": 9,
+          "total_breaks": 48,
+          "capture": 0.1875,
+          "precision": 0.047619,
+          "observed_non_events": 180
+        },
+        "lookup": {
+          "budget_length_m": 45268.178,
+          "selected_segments": 246,
+          "selected_length_m": 45113.009,
+          "breaks_captured": 10,
+          "total_breaks": 48,
+          "capture": 0.208333,
+          "precision": 0.04065,
+          "observed_non_events": 236
+        },
+        "oldest": {
+          "budget_length_m": 45268.178,
+          "selected_segments": 627,
+          "selected_length_m": 45243.525,
+          "breaks_captured": 3,
+          "total_breaks": 48,
+          "capture": 0.0625,
+          "precision": 0.004785,
+          "observed_non_events": 624
+        },
+        "prior_breaks": {
+          "budget_length_m": 45268.178,
+          "selected_segments": 218,
+          "selected_length_m": 45130.547,
+          "breaks_captured": 16,
+          "total_breaks": 48,
+          "capture": 0.333333,
+          "precision": 0.073394,
+          "observed_non_events": 202
+        },
+        "random": {
+          "budget_length_m": 45268.178,
+          "selected_segments": 806,
+          "selected_length_m": 45144.812,
+          "breaks_captured": 0,
+          "total_breaks": 48,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 806
+        },
+        "champion": {
+          "budget_length_m": 45268.178,
+          "selected_segments": 218,
+          "selected_length_m": 45130.547,
+          "breaks_captured": 16,
+          "total_breaks": 48,
+          "capture": 0.333333,
+          "precision": 0.073394,
+          "observed_non_events": 202
+        }
+      },
+      "budget_0.10": {
+        "logistic": {
+          "budget_length_m": 90536.356,
+          "selected_segments": 460,
+          "selected_length_m": 90533.46,
+          "breaks_captured": 23,
+          "total_breaks": 48,
+          "capture": 0.479167,
+          "precision": 0.05,
+          "observed_non_events": 437
+        },
+        "lookup": {
+          "budget_length_m": 90536.356,
+          "selected_segments": 552,
+          "selected_length_m": 90319.253,
+          "breaks_captured": 26,
+          "total_breaks": 48,
+          "capture": 0.541667,
+          "precision": 0.047101,
+          "observed_non_events": 526
+        },
+        "oldest": {
+          "budget_length_m": 90536.356,
+          "selected_segments": 1230,
+          "selected_length_m": 90515.477,
+          "breaks_captured": 11,
+          "total_breaks": 48,
+          "capture": 0.229167,
+          "precision": 0.008943,
+          "observed_non_events": 1219
+        },
+        "prior_breaks": {
+          "budget_length_m": 90536.356,
+          "selected_segments": 539,
+          "selected_length_m": 90527.675,
+          "breaks_captured": 25,
+          "total_breaks": 48,
+          "capture": 0.520833,
+          "precision": 0.046382,
+          "observed_non_events": 514
+        },
+        "random": {
+          "budget_length_m": 90536.356,
+          "selected_segments": 1716,
+          "selected_length_m": 90402.928,
+          "breaks_captured": 4,
+          "total_breaks": 48,
+          "capture": 0.083333,
+          "precision": 0.002331,
+          "observed_non_events": 1712
+        },
+        "champion": {
+          "budget_length_m": 90536.356,
+          "selected_segments": 539,
+          "selected_length_m": 90527.675,
+          "breaks_captured": 25,
+          "total_breaks": 48,
+          "capture": 0.520833,
+          "precision": 0.046382,
+          "observed_non_events": 514
+        }
+      },
+      "pr_auc": {
+        "logistic": 0.049706,
+        "lookup": 0.031921,
+        "oldest": 0.009355,
+        "prior_breaks": 0.045928,
+        "random": 0.003131,
+        "champion": 0.045928
+      }
+    },
+    "2025": {
+      "summary": {
+        "eligible_segments": 15918,
+        "network_length_m": 910399.28,
+        "total_breaks": 69
+      },
+      "budget_0.01": {
+        "logistic": {
+          "budget_length_m": 9103.993,
+          "selected_segments": 26,
+          "selected_length_m": 8742.408,
+          "breaks_captured": 4,
+          "total_breaks": 69,
+          "capture": 0.057971,
+          "precision": 0.153846,
+          "observed_non_events": 22
+        },
+        "lookup": {
+          "budget_length_m": 9103.993,
+          "selected_segments": 46,
+          "selected_length_m": 8958.365,
+          "breaks_captured": 3,
+          "total_breaks": 69,
+          "capture": 0.043478,
+          "precision": 0.065217,
+          "observed_non_events": 43
+        },
+        "oldest": {
+          "budget_length_m": 9103.993,
+          "selected_segments": 180,
+          "selected_length_m": 9023.062,
+          "breaks_captured": 2,
+          "total_breaks": 69,
+          "capture": 0.028986,
+          "precision": 0.011111,
+          "observed_non_events": 178
+        },
+        "prior_breaks": {
+          "budget_length_m": 9103.993,
+          "selected_segments": 36,
+          "selected_length_m": 9068.362,
+          "breaks_captured": 9,
+          "total_breaks": 69,
+          "capture": 0.130435,
+          "precision": 0.25,
+          "observed_non_events": 27
+        },
+        "random": {
+          "budget_length_m": 9103.993,
+          "selected_segments": 172,
+          "selected_length_m": 9035.179,
+          "breaks_captured": 1,
+          "total_breaks": 69,
+          "capture": 0.014493,
+          "precision": 0.005814,
+          "observed_non_events": 171
+        },
+        "champion": {
+          "budget_length_m": 9103.993,
+          "selected_segments": 36,
+          "selected_length_m": 9068.362,
+          "breaks_captured": 9,
+          "total_breaks": 69,
+          "capture": 0.130435,
+          "precision": 0.25,
+          "observed_non_events": 27
+        }
+      },
+      "budget_0.02": {
+        "logistic": {
+          "budget_length_m": 18207.986,
+          "selected_segments": 61,
+          "selected_length_m": 18165.247,
+          "breaks_captured": 7,
+          "total_breaks": 69,
+          "capture": 0.101449,
+          "precision": 0.114754,
+          "observed_non_events": 54
+        },
+        "lookup": {
+          "budget_length_m": 18207.986,
+          "selected_segments": 95,
+          "selected_length_m": 18198.651,
+          "breaks_captured": 9,
+          "total_breaks": 69,
+          "capture": 0.130435,
+          "precision": 0.094737,
+          "observed_non_events": 86
+        },
+        "oldest": {
+          "budget_length_m": 18207.986,
+          "selected_segments": 312,
+          "selected_length_m": 18190.154,
+          "breaks_captured": 4,
+          "total_breaks": 69,
+          "capture": 0.057971,
+          "precision": 0.012821,
+          "observed_non_events": 308
+        },
+        "prior_breaks": {
+          "budget_length_m": 18207.986,
+          "selected_segments": 74,
+          "selected_length_m": 17950.952,
+          "breaks_captured": 12,
+          "total_breaks": 69,
+          "capture": 0.173913,
+          "precision": 0.162162,
+          "observed_non_events": 62
+        },
+        "random": {
+          "budget_length_m": 18207.986,
+          "selected_segments": 344,
+          "selected_length_m": 18202.532,
+          "breaks_captured": 3,
+          "total_breaks": 69,
+          "capture": 0.043478,
+          "precision": 0.008721,
+          "observed_non_events": 341
+        },
+        "champion": {
+          "budget_length_m": 18207.986,
+          "selected_segments": 74,
+          "selected_length_m": 17950.952,
+          "breaks_captured": 12,
+          "total_breaks": 69,
+          "capture": 0.173913,
+          "precision": 0.162162,
+          "observed_non_events": 62
+        }
+      },
+      "budget_0.05": {
+        "logistic": {
+          "budget_length_m": 45519.964,
+          "selected_segments": 191,
+          "selected_length_m": 45473.077,
+          "breaks_captured": 25,
+          "total_breaks": 69,
+          "capture": 0.362319,
+          "precision": 0.13089,
+          "observed_non_events": 166
+        },
+        "lookup": {
+          "budget_length_m": 45519.964,
+          "selected_segments": 248,
+          "selected_length_m": 45459.725,
+          "breaks_captured": 23,
+          "total_breaks": 69,
+          "capture": 0.333333,
+          "precision": 0.092742,
+          "observed_non_events": 225
+        },
+        "oldest": {
+          "budget_length_m": 45519.964,
+          "selected_segments": 630,
+          "selected_length_m": 45491.268,
+          "breaks_captured": 6,
+          "total_breaks": 69,
+          "capture": 0.086957,
+          "precision": 0.009524,
+          "observed_non_events": 624
+        },
+        "prior_breaks": {
+          "budget_length_m": 45519.964,
+          "selected_segments": 219,
+          "selected_length_m": 43529.505,
+          "breaks_captured": 27,
+          "total_breaks": 69,
+          "capture": 0.391304,
+          "precision": 0.123288,
+          "observed_non_events": 192
+        },
+        "random": {
+          "budget_length_m": 45519.964,
+          "selected_segments": 816,
+          "selected_length_m": 45318.209,
+          "breaks_captured": 4,
+          "total_breaks": 69,
+          "capture": 0.057971,
+          "precision": 0.004902,
+          "observed_non_events": 812
+        },
+        "champion": {
+          "budget_length_m": 45519.964,
+          "selected_segments": 219,
+          "selected_length_m": 43529.505,
+          "breaks_captured": 27,
+          "total_breaks": 69,
+          "capture": 0.391304,
+          "precision": 0.123288,
+          "observed_non_events": 192
+        }
+      },
+      "budget_0.10": {
+        "logistic": {
+          "budget_length_m": 91039.928,
+          "selected_segments": 459,
+          "selected_length_m": 90910.825,
+          "breaks_captured": 39,
+          "total_breaks": 69,
+          "capture": 0.565217,
+          "precision": 0.084967,
+          "observed_non_events": 420
+        },
+        "lookup": {
+          "budget_length_m": 91039.928,
+          "selected_segments": 560,
+          "selected_length_m": 91005.208,
+          "breaks_captured": 45,
+          "total_breaks": 69,
+          "capture": 0.652174,
+          "precision": 0.080357,
+          "observed_non_events": 515
+        },
+        "oldest": {
+          "budget_length_m": 91039.928,
+          "selected_segments": 1233,
+          "selected_length_m": 90753.101,
+          "breaks_captured": 17,
+          "total_breaks": 69,
+          "capture": 0.246377,
+          "precision": 0.013788,
+          "observed_non_events": 1216
+        },
+        "prior_breaks": {
+          "budget_length_m": 91039.928,
+          "selected_segments": 543,
+          "selected_length_m": 90951.662,
+          "breaks_captured": 46,
+          "total_breaks": 69,
+          "capture": 0.666667,
+          "precision": 0.084715,
+          "observed_non_events": 497
+        },
+        "random": {
+          "budget_length_m": 91039.928,
+          "selected_segments": 1632,
+          "selected_length_m": 90953.347,
+          "breaks_captured": 5,
+          "total_breaks": 69,
+          "capture": 0.072464,
+          "precision": 0.003064,
+          "observed_non_events": 1627
+        },
+        "champion": {
+          "budget_length_m": 91039.928,
+          "selected_segments": 543,
+          "selected_length_m": 90951.662,
+          "breaks_captured": 46,
+          "total_breaks": 69,
+          "capture": 0.666667,
+          "precision": 0.084715,
+          "observed_non_events": 497
+        }
+      },
+      "pr_auc": {
+        "logistic": 0.097041,
+        "lookup": 0.069906,
+        "oldest": 0.017049,
+        "prior_breaks": 0.099805,
+        "random": 0.004295,
+        "champion": 0.099805
+      }
+    }
+  },
+  "uncertainty": {
+    "method": "paired segment bootstrap within each test year; pooled replicates average the yearly replicates",
+    "n_resamples": 1000,
+    "confidence_level": 0.95,
+    "seed": 2026,
+    "capture": {
+      "budget_0.01": {
+        "logistic": {
+          "ci_mean": [
+            0.020833,
+            0.094376
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.139618
+            ],
+            "2024": [
+              0.0,
+              0.115407
+            ],
+            "2025": [
+              0.013889,
+              0.119448
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.008886,
+            0.072288
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.142857
+            ],
+            "2024": [
+              0.0,
+              0.057157
+            ],
+            "2025": [
+              0.0,
+              0.102954
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.0,
+            0.039105
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.0
+            ],
+            "2024": [
+              0.0,
+              0.073171
+            ],
+            "2025": [
+              0.0,
+              0.080678
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.049698,
+            0.13996
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.129032
+            ],
+            "2024": [
+              0.022715,
+              0.195652
+            ],
+            "2025": [
+              0.056318,
+              0.206932
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            0.0,
+            0.015631
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.0
+            ],
+            "2024": [
+              0.0,
+              0.0
+            ],
+            "2025": [
+              0.0,
+              0.046894
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.049698,
+            0.13996
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.129032
+            ],
+            "2024": [
+              0.022715,
+              0.195652
+            ],
+            "2025": [
+              0.056318,
+              0.206932
+            ]
+          }
+        }
+      },
+      "budget_0.02": {
+        "logistic": {
+          "ci_mean": [
+            0.056441,
+            0.156512
+          ],
+          "by_year": {
+            "2023": [
+              0.023243,
+              0.210526
+            ],
+            "2024": [
+              0.023243,
+              0.195135
+            ],
+            "2025": [
+              0.038949,
+              0.181818
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.06146,
+            0.159062
+          ],
+          "by_year": {
+            "2023": [
+              0.024376,
+              0.22502
+            ],
+            "2024": [
+              0.0,
+              0.150974
+            ],
+            "2025": [
+              0.064087,
+              0.226696
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.005126,
+            0.052964
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.0
+            ],
+            "2024": [
+              0.0,
+              0.073171
+            ],
+            "2025": [
+              0.0,
+              0.115942
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.075441,
+            0.179501
+          ],
+          "by_year": {
+            "2023": [
+              0.022222,
+              0.205128
+            ],
+            "2024": [
+              0.024985,
+              0.205208
+            ],
+            "2025": [
+              0.086938,
+              0.27027
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            0.0,
+            0.034832
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.0
+            ],
+            "2024": [
+              0.0,
+              0.0
+            ],
+            "2025": [
+              0.0,
+              0.103911
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.075441,
+            0.179501
+          ],
+          "by_year": {
+            "2023": [
+              0.022222,
+              0.205128
+            ],
+            "2024": [
+              0.024985,
+              0.205208
+            ],
+            "2025": [
+              0.086938,
+              0.27027
+            ]
+          }
+        }
+      },
+      "budget_0.05": {
+        "logistic": {
+          "ci_mean": [
+            0.196291,
+            0.337474
+          ],
+          "by_year": {
+            "2023": [
+              0.127593,
+              0.404778
+            ],
+            "2024": [
+              0.075472,
+              0.302343
+            ],
+            "2025": [
+              0.246377,
+              0.476957
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.204137,
+            0.344134
+          ],
+          "by_year": {
+            "2023": [
+              0.149954,
+              0.428571
+            ],
+            "2024": [
+              0.101653,
+              0.350074
+            ],
+            "2025": [
+              0.210496,
+              0.441258
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.029725,
+            0.109762
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.138889
+            ],
+            "2024": [
+              0.0,
+              0.139618
+            ],
+            "2025": [
+              0.027778,
+              0.155854
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.253032,
+            0.404074
+          ],
+          "by_year": {
+            "2023": [
+              0.128205,
+              0.392919
+            ],
+            "2024": [
+              0.208297,
+              0.485805
+            ],
+            "2025": [
+              0.279388,
+              0.500151
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            0.005291,
+            0.056008
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.083333
+            ],
+            "2024": [
+              0.0,
+              0.0
+            ],
+            "2025": [
+              0.014085,
+              0.123288
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.253032,
+            0.404074
+          ],
+          "by_year": {
+            "2023": [
+              0.128205,
+              0.392919
+            ],
+            "2024": [
+              0.208297,
+              0.485805
+            ],
+            "2025": [
+              0.279388,
+              0.500151
+            ]
+          }
+        }
+      },
+      "budget_0.10": {
+        "logistic": {
+          "ci_mean": [
+            0.395706,
+            0.555469
+          ],
+          "by_year": {
+            "2023": [
+              0.236842,
+              0.538462
+            ],
+            "2024": [
+              0.350855,
+              0.625136
+            ],
+            "2025": [
+              0.44302,
+              0.684248
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.437877,
+            0.597383
+          ],
+          "by_year": {
+            "2023": [
+              0.230769,
+              0.533372
+            ],
+            "2024": [
+              0.4,
+              0.686275
+            ],
+            "2025": [
+              0.524571,
+              0.760617
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.164293,
+            0.314226
+          ],
+          "by_year": {
+            "2023": [
+              0.102564,
+              0.368513
+            ],
+            "2024": [
+              0.107143,
+              0.333333
+            ],
+            "2025": [
+              0.147529,
+              0.405498
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.442795,
+            0.603543
+          ],
+          "by_year": {
+            "2023": [
+              0.243243,
+              0.552632
+            ],
+            "2024": [
+              0.377778,
+              0.666667
+            ],
+            "2025": [
+              0.540519,
+              0.772742
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            0.026481,
+            0.095799
+          ],
+          "by_year": {
+            "2023": [
+              0.0,
+              0.083333
+            ],
+            "2024": [
+              0.018174,
+              0.16335
+            ],
+            "2025": [
+              0.016123,
+              0.138898
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.442795,
+            0.603543
+          ],
+          "by_year": {
+            "2023": [
+              0.243243,
+              0.552632
+            ],
+            "2024": [
+              0.377778,
+              0.666667
+            ],
+            "2025": [
+              0.540519,
+              0.772742
+            ]
+          }
+        }
+      }
+    },
+    "difference_vs_oldest": {
+      "budget_0.01": {
+        "logistic": {
+          "ci_mean": [
+            -0.002381,
+            0.078245
+          ],
+          "share_of_resamples_above_zero": 0.962,
+          "by_year": {
+            "2023": [
+              0.0,
+              0.139618
+            ],
+            "2024": [
+              -0.041667,
+              0.105334
+            ],
+            "2025": [
+              -0.044793,
+              0.101455
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            -0.0162,
+            0.058513
+          ],
+          "share_of_resamples_above_zero": 0.84,
+          "by_year": {
+            "2023": [
+              0.0,
+              0.142857
+            ],
+            "2024": [
+              -0.071429,
+              0.043502
+            ],
+            "2025": [
+              -0.050847,
+              0.086433
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.0,
+            0.0
+          ],
+          "share_of_resamples_above_zero": 0.0,
+          "by_year": {
+            "2023": [
+              0.0,
+              0.0
+            ],
+            "2024": [
+              0.0,
+              0.0
+            ],
+            "2025": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.024517,
+            0.125836
+          ],
+          "share_of_resamples_above_zero": 0.999,
+          "by_year": {
+            "2023": [
+              0.0,
+              0.129032
+            ],
+            "2024": [
+              -0.000391,
+              0.180045
+            ],
+            "2025": [
+              0.0,
+              0.191781
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            -0.036566,
+            0.005628
+          ],
+          "share_of_resamples_above_zero": 0.08,
+          "by_year": {
+            "2023": [
+              0.0,
+              0.0
+            ],
+            "2024": [
+              -0.073171,
+              0.0
+            ],
+            "2025": [
+              -0.074636,
+              0.031262
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.024517,
+            0.125836
+          ],
+          "share_of_resamples_above_zero": 0.999,
+          "by_year": {
+            "2023": [
+              0.0,
+              0.129032
+            ],
+            "2024": [
+              -0.000391,
+              0.180045
+            ],
+            "2025": [
+              0.0,
+              0.191781
+            ]
+          }
+        }
+      },
+      "budget_0.02": {
+        "logistic": {
+          "ci_mean": [
+            0.019997,
+            0.133893
+          ],
+          "share_of_resamples_above_zero": 0.998,
+          "by_year": {
+            "2023": [
+              0.021739,
+              0.210526
+            ],
+            "2024": [
+              -0.017568,
+              0.177833
+            ],
+            "2025": [
+              -0.044847,
+              0.145008
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.026946,
+            0.134567
+          ],
+          "share_of_resamples_above_zero": 0.998,
+          "by_year": {
+            "2023": [
+              0.023243,
+              0.225
+            ],
+            "2024": [
+              -0.03848,
+              0.134628
+            ],
+            "2025": [
+              -0.016674,
+              0.180587
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.0,
+            0.0
+          ],
+          "share_of_resamples_above_zero": 0.0,
+          "by_year": {
+            "2023": [
+              0.0,
+              0.0
+            ],
+            "2024": [
+              0.0,
+              0.0
+            ],
+            "2025": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.041033,
+            0.157544
+          ],
+          "share_of_resamples_above_zero": 1.0,
+          "by_year": {
+            "2023": [
+              0.021739,
+              0.205128
+            ],
+            "2024": [
+              0.0,
+              0.191489
+            ],
+            "2025": [
+              0.0,
+              0.230804
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            -0.041131,
+            0.018267
+          ],
+          "share_of_resamples_above_zero": 0.186,
+          "by_year": {
+            "2023": [
+              0.0,
+              0.0
+            ],
+            "2024": [
+              -0.073171,
+              0.0
+            ],
+            "2025": [
+              -0.085714,
+              0.063571
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.041033,
+            0.157544
+          ],
+          "share_of_resamples_above_zero": 1.0,
+          "by_year": {
+            "2023": [
+              0.021739,
+              0.205128
+            ],
+            "2024": [
+              0.0,
+              0.191489
+            ],
+            "2025": [
+              0.0,
+              0.230804
+            ]
+          }
+        }
+      },
+      "budget_0.05": {
+        "logistic": {
+          "ci_mean": [
+            0.119682,
+            0.281871
+          ],
+          "share_of_resamples_above_zero": 1.0,
+          "by_year": {
+            "2023": [
+              0.05,
+              0.365854
+            ],
+            "2024": [
+              0.0,
+              0.244444
+            ],
+            "2025": [
+              0.134272,
+              0.418993
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.125573,
+            0.286234
+          ],
+          "share_of_resamples_above_zero": 1.0,
+          "by_year": {
+            "2023": [
+              0.083333,
+              0.380987
+            ],
+            "2024": [
+              0.01999,
+              0.295476
+            ],
+            "2025": [
+              0.102868,
+              0.370385
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.0,
+            0.0
+          ],
+          "share_of_resamples_above_zero": 0.0,
+          "by_year": {
+            "2023": [
+              0.0,
+              0.0
+            ],
+            "2024": [
+              0.0,
+              0.0
+            ],
+            "2025": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.175593,
+            0.348941
+          ],
+          "share_of_resamples_above_zero": 1.0,
+          "by_year": {
+            "2023": [
+              0.062453,
+              0.342274
+            ],
+            "2024": [
+              0.125,
+              0.433983
+            ],
+            "2025": [
+              0.169231,
+              0.444482
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            -0.086375,
+            0.004694
+          ],
+          "share_of_resamples_above_zero": 0.045,
+          "by_year": {
+            "2023": [
+              -0.114336,
+              0.055595
+            ],
+            "2024": [
+              -0.139618,
+              0.0
+            ],
+            "2025": [
+              -0.106703,
+              0.053333
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.175593,
+            0.348941
+          ],
+          "share_of_resamples_above_zero": 1.0,
+          "by_year": {
+            "2023": [
+              0.062453,
+              0.342274
+            ],
+            "2024": [
+              0.125,
+              0.433983
+            ],
+            "2025": [
+              0.169231,
+              0.444482
+            ]
+          }
+        }
+      },
+      "budget_0.10": {
+        "logistic": {
+          "ci_mean": [
+            0.134999,
+            0.341556
+          ],
+          "share_of_resamples_above_zero": 1.0,
+          "by_year": {
+            "2023": [
+              -0.021751,
+              0.341463
+            ],
+            "2024": [
+              0.08569,
+              0.44903
+            ],
+            "2025": [
+              0.136313,
+              0.455914
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.169941,
+            0.393745
+          ],
+          "share_of_resamples_above_zero": 1.0,
+          "by_year": {
+            "2023": [
+              -0.0625,
+              0.355629
+            ],
+            "2024": [
+              0.133333,
+              0.509804
+            ],
+            "2025": [
+              0.197178,
+              0.528592
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.0,
+            0.0
+          ],
+          "share_of_resamples_above_zero": 0.0,
+          "by_year": {
+            "2023": [
+              0.0,
+              0.0
+            ],
+            "2024": [
+              0.0,
+              0.0
+            ],
+            "2025": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.17716,
+            0.402067
+          ],
+          "share_of_resamples_above_zero": 1.0,
+          "by_year": {
+            "2023": [
+              -0.051316,
+              0.382453
+            ],
+            "2024": [
+              0.114259,
+              0.482232
+            ],
+            "2025": [
+              0.234349,
+              0.544122
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            -0.263156,
+            -0.095123
+          ],
+          "share_of_resamples_above_zero": 0.0,
+          "by_year": {
+            "2023": [
+              -0.355694,
+              -0.068908
+            ],
+            "2024": [
+              -0.27907,
+              0.0
+            ],
+            "2025": [
+              -0.34673,
+              -0.054795
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.17716,
+            0.402067
+          ],
+          "share_of_resamples_above_zero": 1.0,
+          "by_year": {
+            "2023": [
+              -0.051316,
+              0.382453
+            ],
+            "2024": [
+              0.114259,
+              0.482232
+            ],
+            "2025": [
+              0.234349,
+              0.544122
+            ]
+          }
+        }
+      }
+    }
+  },
+  "robustness": {
+    "budget": 0.05,
+    "note": "models are fitted on clean training years; only test-year inputs are corrupted; evaluation uses true lengths and outcomes",
+    "scenarios": {
+      "mask_05": {
+        "description": "Hide 5% of material, diameter, install-year and nearby-break values",
+        "affected_rows": 6765,
+        "affected_rows_confidence": {
+          "HIGH": 0.0,
+          "MEDIUM": 0.3184,
+          "LOW": 0.6816
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.267995,
+            "capture_at_05_change": 0.009722,
+            "spearman_rank_corr": 0.955844,
+            "selection_overlap_at_05": 0.892834
+          },
+          "lookup": {
+            "capture_at_05": 0.304106,
+            "capture_at_05_change": 0.031884,
+            "spearman_rank_corr": 0.938364,
+            "selection_overlap_at_05": 0.862395
+          },
+          "oldest": {
+            "capture_at_05": 0.049879,
+            "capture_at_05_change": -0.016606,
+            "spearman_rank_corr": 0.904447,
+            "selection_overlap_at_05": 0.871904
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.324879,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "champion": {
+            "capture_at_05": 0.324879,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          }
+        }
+      },
+      "mask_10": {
+        "description": "Hide 10% of material, diameter, install-year and nearby-break values",
+        "affected_rows": 12789,
+        "affected_rows_confidence": {
+          "HIGH": 0.0,
+          "MEDIUM": 0.2963,
+          "LOW": 0.7037
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.269505,
+            "capture_at_05_change": 0.011232,
+            "spearman_rank_corr": 0.919781,
+            "selection_overlap_at_05": 0.76739
+          },
+          "lookup": {
+            "capture_at_05": 0.282609,
+            "capture_at_05_change": 0.010386,
+            "spearman_rank_corr": 0.884275,
+            "selection_overlap_at_05": 0.810736
+          },
+          "oldest": {
+            "capture_at_05": 0.058152,
+            "capture_at_05_change": -0.008333,
+            "spearman_rank_corr": 0.80888,
+            "selection_overlap_at_05": 0.816407
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.324879,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "champion": {
+            "capture_at_05": 0.324879,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          }
+        }
+      },
+      "unseen_material_05": {
+        "description": "Replace 5% of materials with a value never seen in training",
+        "affected_rows": 2398,
+        "affected_rows_confidence": {
+          "HIGH": 0.0,
+          "MEDIUM": 0.0,
+          "LOW": 1.0
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.251329,
+            "capture_at_05_change": -0.006944,
+            "spearman_rank_corr": 0.974497,
+            "selection_overlap_at_05": 0.934802
+          },
+          "lookup": {
+            "capture_at_05": 0.267391,
+            "capture_at_05_change": -0.004831,
+            "spearman_rank_corr": 0.948196,
+            "selection_overlap_at_05": 0.917527
+          },
+          "oldest": {
+            "capture_at_05": 0.066486,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.324879,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "champion": {
+            "capture_at_05": 0.324879,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          }
+        }
+      },
+      "perturb_numeric": {
+        "description": "Shift install years by up to 2 years and lengths by up to 5%",
+        "affected_rows": 47303,
+        "affected_rows_confidence": {
+          "HIGH": 0.9862,
+          "MEDIUM": 0.0105,
+          "LOW": 0.0034
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.271437,
+            "capture_at_05_change": 0.013164,
+            "spearman_rank_corr": 0.990518,
+            "selection_overlap_at_05": 0.931753
+          },
+          "lookup": {
+            "capture_at_05": 0.272222,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 0.985948,
+            "selection_overlap_at_05": 0.948357
+          },
+          "oldest": {
+            "capture_at_05": 0.080374,
+            "capture_at_05_change": 0.013889,
+            "spearman_rank_corr": 0.996612,
+            "selection_overlap_at_05": 0.847332
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.324879,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "champion": {
+            "capture_at_05": 0.324879,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          }
+        }
+      }
+    }
+  },
+  "sensitivity": {
+    "ambiguous_rows": 2406,
+    "variant": "ambiguous histories included",
+    "capture_at_05": {
+      "logistic": 0.26627,
+      "lookup": 0.282341,
+      "oldest": 0.066071,
+      "prior_breaks": 0.323016,
+      "random": 0.027381
+    }
+  },
+  "inputs": {
+    "contract_a_rows": 316222,
+    "panel_rows": 313816,
+    "ambiguous_histories": "excluded",
+    "score_years": [
+      2000,
+      2025
+    ],
+    "outcomes_complete_through": 2025,
+    "incomplete_score_years_excluded": [],
+    "seed": 2026
+  },
+  "limitations": [
+    "Capture counts segments with at least one recorded break in the test year, not individual break events.",
+    "A selected segment without a recorded break is an observed non-event, not proof that acting on it was unnecessary.",
+    "Results measure targeting quality at a fixed network-length budget, not breaks prevented or money saved.",
+    "risk_percentile is a within-year ranking, not a calibrated probability.",
+    "The random baseline is a single seeded draw per test year.",
+    "Features come from a current-inventory snapshot; pipes replaced before the snapshot are absent (survivorship). See docs/data-card.md.",
+    "Validated on City of Kitchener open data only; performance in Malaysia is untested."
+  ]
+}

@@ -21,8 +21,14 @@
 
 ## 3. Data
 
-Input is Member 1's Contract A (`artifacts/pipe_year.parquet`). See `docs/data-card.md` for sources, joins, snapshot date and exclusions.
+Input is Member 1's data package in `data/` (Kitchener open data, snapshot 2026-10-10). See `data/data_quality_report.md` and `data/data_dictionary.md` for sources, joins and exclusions.
 
+- **Adapter.** Member 1's `data/data/pipe_year.parquet` uses its own field names. `src/modeling/adapters.py` maps it onto Contract A, and `--write-contract-a` saves the result as `artifacts/pipe_year.parquet` for Members 3 and 4. Mapping decisions:
+  - fields are renamed (`year`→`score_year`, `installation_year`→`install_year`, `pipe_size_mm`→`diameter_mm`, `ambiguous_asset_history`→`is_ambiguous_history`), and `segment_id` becomes a string;
+  - `data_quality_flags` is built from `material_unknown`, `pipe_size_missing` and `ambiguous_asset_history`. `installation_date_jan1` is left out: it marks year-only date precision on about 43% of rows, and flagging it would downgrade half the network to MEDIUM over ±1 year of age;
+  - `source_snapshot_date` comes from `data/manifest.json`.
+- **Burn-in.** Score years before 2000 are dropped (`--first-score-year`). The break log starts in 1997, so those years have almost no recorded history; Member 1's report recommends treating them as burn-in. Their breaks still count toward later years' history.
+- **Predictors** stay within Member 1's allowlist: age, material, pipe size, length, prior breaks, years since last break, plus the install decade, which follows from age and score year.
 - The input must pass `validate_pipe_year` in `src/modeling/contracts.py` before modeling runs.
 - **Primary panel:** excludes rows with `is_ambiguous_history = true`.
 - **Sensitivity:** reruns with ambiguous rows included, blanking negative ages. The result is reported under `metrics.json -> sensitivity`.
@@ -127,9 +133,12 @@ Read them from `artifacts/metrics.json`. The Contract B fixture in `contracts/fi
 See `metrics.json -> limitations`, which is generated with the results. Key items:
 
 - current-inventory snapshot and survivorship;
+- results are conditional on breaks that link to a current, eligible pipe. Member 1 reports 508 completed main breaks with no matching pipe;
 - one open-data city;
-- the random baseline is a single seeded draw; and
-- percentiles are not probabilities.
+- the random baseline is a single seeded draw;
+- percentiles are not probabilities;
+- **tied scores** (most pipes have zero prior breaks, ages are whole years) are ordered by `segment_id` under the contract. On the 2026-10-10 data, breaking ties randomly instead changed the champion's capture@5% by at most one break per test year, so asset-ID order is not acting as a hidden predictor; and
+- **the stress tests cannot hurt a history-only champion.** The prior-breaks method does not use material, diameter or install year, so its zero change under masking reflects which inputs it uses, not resilience. The lookup and logistic rows in `metrics.json -> robustness` show the real sensitivity.
 
 ## 12. Claim discipline
 
@@ -144,14 +153,16 @@ Requires Python 3.11+ with `pandas`, `numpy`, `scikit-learn`, `pyarrow` and `pyt
 # tests
 python -m pytest tests/modeling
 
-# real run (after Member 1 publishes Contract A)
-python -m src.modeling.run_evaluation --input artifacts/pipe_year.parquet
+# real run on Member 1's package -> artifacts/fold_predictions.parquet, artifacts/metrics.json
+# and the adapted Contract A at artifacts/pipe_year.parquet (about 70 s)
+python -m src.modeling.run_evaluation --member1-package data \
+  --write-contract-a artifacts/pipe_year.parquet
 
 # synthetic Contract B fixture for Members 3 and 4, plus the matching synthetic Contract A
 python -m src.modeling.run_evaluation --synthetic \
   --predictions-out contracts/fixtures/fold_predictions.fixture.parquet \
   --metrics-out contracts/fixtures/metrics.example.json \
-  --write-synthetic-input artifacts/dev/pipe_year.synthetic.parquet
+  --write-contract-a artifacts/dev/pipe_year.synthetic.parquet
 ```
 
 The seed is fixed (`SEED` in `src/modeling/config.py`), so reruns reproduce the artifacts. Only `generated_at` differs between runs.
