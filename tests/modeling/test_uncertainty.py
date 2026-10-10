@@ -52,6 +52,13 @@ def test_champion_difference_vs_oldest_is_reported(evaluation):
     assert set(diff["by_year"]) == {"2021", "2022", "2023"}
 
 
+def test_champion_difference_exists_when_oldest_is_champion(evaluation):
+    result = bootstrap_uncertainty(evaluation.predictions, "oldest", n_resamples=50, seed=1)
+    diff = result["difference_vs_oldest"][LABEL]["champion"]
+    assert diff["ci_mean"] == [0.0, 0.0]
+    assert diff["share_of_resamples_above_zero"] == 0.0
+
+
 def test_bootstrap_is_reproducible_and_seed_dependent(evaluation):
     predictions, champion = evaluation.predictions, evaluation.metrics["champion_method"]
     first = bootstrap_uncertainty(predictions, champion, n_resamples=100, seed=1)

@@ -99,8 +99,10 @@ def bootstrap_uncertainty(
                 "ci_mean": interval(nanmean_rows(np.column_stack(list(yearly.values())))),
                 "by_year": {str(year): interval(values) for year, values in yearly.items()},
             }
-            if method == "oldest" or "oldest" not in methods:
+            if "oldest" not in methods:
                 continue
+            # oldest - oldest is identically zero, but keeping it means the champion
+            # alias exists even when oldest-first is the champion.
             yearly_diff = {year: reps[method][:, k] - reps["oldest"][:, k] for year, reps in per_year.items()}
             pooled = nanmean_rows(np.column_stack(list(yearly_diff.values())))
             valid = pooled[~np.isnan(pooled)]

@@ -29,7 +29,7 @@ from .contracts import (
     validate_pipe_year,
 )
 from .evaluate import run_evaluation
-from .synthetic import make_synthetic_pipe_year
+from .synthetic import DEFAULT_SEGMENTS, make_synthetic_pipe_year
 
 
 def parse_args(argv=None) -> argparse.Namespace:
@@ -37,7 +37,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--input", type=Path, help="Contract A parquet (pipe_year)")
     source.add_argument("--synthetic", action="store_true", help="use generated development data")
-    parser.add_argument("--synthetic-segments", type=int, default=600)
+    parser.add_argument("--synthetic-segments", type=int, default=DEFAULT_SEGMENTS)
     parser.add_argument("--synthetic-seed", type=int, default=7)
     parser.add_argument("--write-synthetic-input", type=Path, help="also save the synthetic Contract A used")
     parser.add_argument("--test-years", type=int, nargs="+", help="default: latest three with enough history")
