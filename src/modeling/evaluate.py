@@ -36,7 +36,7 @@ from .config import (
 )
 from .features import numeric
 from .methods import RANKERS, Ranker
-from .splits import default_test_years, split_frame, walk_forward_folds
+from .splits import default_test_years, last_complete_year, split_frame, walk_forward_folds
 
 CONTRACT_B_COLUMNS = [
     "segment_id",
@@ -73,9 +73,15 @@ class EvaluationResult:
     year_table: pd.DataFrame  # one row per test_year x method x budget
 
 
-def prepare_panel(pipe_year: pd.DataFrame, exclude_ambiguous: bool = True) -> pd.DataFrame:
-    """The primary panel drops ambiguous histories. The sensitivity panel keeps
-    them but blanks negative ages, which cannot be valid features."""
+def prepare_panel(
+    pipe_year: pd.DataFrame, exclude_ambiguous: bool = True, complete_through: int | None = None
+) -> pd.DataFrame:
+    """Rows for score years after ``complete_through`` are dropped because their
+    outcomes are not fully observed yet. The primary panel also drops ambiguous
+    histories; the sensitivity panel keeps them but blanks negative ages,
+    which cannot be valid features."""
+    if complete_through is not None:
+        pipe_year = pipe_year[pipe_year["score_year"] <= complete_through]
     if exclude_ambiguous:
         return pipe_year[~pipe_year["is_ambiguous_history"].astype(bool)].copy()
     panel = pipe_year.copy()
@@ -258,11 +264,25 @@ def build_by_year(table: pd.DataFrame, champion: str, budgets=BUDGETS) -> dict:
     return by_year
 
 
-def _ambiguity_sensitivity(pipe_year, exclude_ambiguous, test_years, seed, budgets, min_train_years, rankers):
-    n_ambiguous = int(pipe_year["is_ambiguous_history"].astype(bool).sum())
+def _outcomes_complete_through(pipe_year: pd.DataFrame, is_synthetic: bool) -> int:
+    complete_through = last_complete_year(pipe_year["source_snapshot_date"])
+    if complete_through is not None:
+        return complete_through
+    if is_synthetic:
+        return int(pipe_year["score_year"].max())  # the generator simulates whole years
+    raise ValueError(
+        "source_snapshot_date must be a date so that incomplete outcome years can be excluded"
+    )
+
+
+def _ambiguity_sensitivity(
+    pipe_year, exclude_ambiguous, complete_through, test_years, seed, budgets, min_train_years, rankers
+):
+    in_window = pipe_year["score_year"] <= complete_through
+    n_ambiguous = int(pipe_year.loc[in_window, "is_ambiguous_history"].astype(bool).sum())
     if n_ambiguous == 0:
         return {"ambiguous_rows": 0, "note": "no ambiguous histories in the input"}
-    alternative = prepare_panel(pipe_year, exclude_ambiguous=not exclude_ambiguous)
+    alternative = prepare_panel(pipe_year, not exclude_ambiguous, complete_through)
     predictions = predict_walk_forward(
         alternative, test_years, seed=seed, rankers=rankers, min_train_years=min_train_years
     )
@@ -287,7 +307,18 @@ def run_evaluation(
     min_train_years: int = MIN_TRAIN_YEARS,
     rankers: dict[str, type[Ranker]] | None = None,
 ) -> EvaluationResult:
-    panel = prepare_panel(pipe_year, exclude_ambiguous)
+    snapshots = sorted(pipe_year["source_snapshot_date"].astype(str).unique())
+    if is_synthetic is None:
+        is_synthetic = any("SYNTHETIC" in s.upper() for s in snapshots)
+    complete_through = _outcomes_complete_through(pipe_year, is_synthetic)
+    if test_years and (too_recent := sorted(int(y) for y in test_years if int(y) > complete_through)):
+        raise ValueError(
+            f"test years {too_recent} are incomplete: the data snapshot ({', '.join(snapshots)}) "
+            f"only covers outcomes through {complete_through}"
+        )
+    incomplete_years = sorted(int(y) for y in pipe_year["score_year"].unique() if y > complete_through)
+
+    panel = prepare_panel(pipe_year, exclude_ambiguous, complete_through)
     years = sorted(int(y) for y in panel["score_year"].unique())
     test_years = sorted(int(y) for y in (test_years or default_test_years(years, min_train_years=min_train_years)))
 
@@ -298,10 +329,6 @@ def run_evaluation(
     methods = summarize_methods(table, budgets)
     champion = select_champion(methods)
     methods["champion"] = dict(methods[champion])
-
-    snapshots = sorted(pipe_year["source_snapshot_date"].astype(str).unique())
-    if is_synthetic is None:
-        is_synthetic = any("SYNTHETIC" in s.upper() for s in snapshots)
 
     metrics = {
         "schema_version": SCHEMA_VERSION,
@@ -324,7 +351,9 @@ def run_evaluation(
         "methods": methods,
         "by_year": build_by_year(table, champion, budgets),
         "sensitivity": (
-            _ambiguity_sensitivity(pipe_year, exclude_ambiguous, test_years, seed, budgets, min_train_years, rankers)
+            _ambiguity_sensitivity(
+                pipe_year, exclude_ambiguous, complete_through, test_years, seed, budgets, min_train_years, rankers
+            )
             if run_sensitivity
             else {"note": "not run"}
         ),
@@ -333,6 +362,8 @@ def run_evaluation(
             "panel_rows": int(len(panel)),
             "ambiguous_histories": "excluded" if exclude_ambiguous else "included",
             "score_years": [years[0], years[-1]],
+            "outcomes_complete_through": complete_through,
+            "incomplete_score_years_excluded": incomplete_years,
             "seed": seed,
         },
         "limitations": ([SYNTHETIC_WARNING] if is_synthetic else []) + LIMITATIONS,

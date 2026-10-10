@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-10T06:13:40+00:00",
+  "generated_at": "2026-10-10T06:36:56+00:00",
   "data_snapshot": "SYNTHETIC-FIXTURE",
   "is_synthetic": true,
   "selection_unit": "network_length_fraction",
@@ -968,6 +968,8 @@
       2008,
       2023
     ],
+    "outcomes_complete_through": 2023,
+    "incomplete_score_years_excluded": [],
     "seed": 2026
   },
   "limitations": [

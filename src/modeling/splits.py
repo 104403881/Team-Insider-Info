@@ -42,6 +42,20 @@ def walk_forward_folds(
     return folds
 
 
+def last_complete_year(snapshot_dates) -> int | None:
+    """Latest calendar year whose outcomes the data snapshot fully covers.
+
+    Year Y is complete only if the snapshot was taken on or after 1 January
+    Y+1, so the answer is the earliest snapshot's year minus one. Returns None
+    if any snapshot value is not a date (such as the synthetic fixture marker).
+    """
+    values = pd.Series(pd.Series(snapshot_dates).dropna().unique()).astype(str)
+    parsed = pd.to_datetime(values, errors="coerce", utc=True, format="mixed")
+    if parsed.empty or parsed.isna().any():
+        return None
+    return int(parsed.min().year) - 1
+
+
 def default_test_years(
     available_years: Iterable[int],
     n: int = N_TEST_YEARS,

@@ -30,11 +30,12 @@ Input is Member 1's Contract A (`artifacts/pipe_year.parquet`). See `docs/data-c
 ## 4. Evaluation protocol
 
 1. **Walk-forward, expanding window.** Test year `Y` trains on every score year `< Y`. No random row split exists in result code, and a test enforces this.
-2. **Point-in-time features.** Contract A guarantees history features use only events before 1 Jan `Y`. Fitted preprocessing (imputation, scaling, encodings, lookup rates) is fitted inside each training fold.
-3. **Equal length budget.** Within a test year, every method ranks the same eligible segments. The budget is `budget x total length` of those segments, so every method gets exactly the same metres.
-4. **Ordering:** `risk_percentile` descending, then `segment_id` ascending.
-5. **Selection:** keep the longest prefix of that ordering whose cumulative `length_m` does not exceed the budget. Stop at the first overflow; do not skip ahead.
-6. **Budgets:** 1%, 2%, 5% and 10% of network length. The primary budget is 5%.
+2. **Complete years only.** Year `Y` counts only if `source_snapshot_date` is on or after 1 Jan `Y+1`. Later score years are dropped, and requesting one as a test year is an error. With the October 2026 Kitchener download, the last usable year is 2025. `metrics.json -> inputs` records `outcomes_complete_through` and the excluded years. Real data must carry a date snapshot.
+3. **Point-in-time features.** Contract A guarantees history features use only events before 1 Jan `Y`. Fitted preprocessing (imputation, scaling, encodings, lookup rates) is fitted inside each training fold.
+4. **Equal length budget.** Within a test year, every method ranks the same eligible segments. The budget is `budget x total length` of those segments, so every method gets exactly the same metres.
+5. **Ordering:** `risk_percentile` descending, then `segment_id` ascending.
+6. **Selection:** keep the longest prefix of that ordering whose cumulative `length_m` does not exceed the budget. Stop at the first overflow; do not skip ahead.
+7. **Budgets:** 1%, 2%, 5% and 10% of network length. The primary budget is 5%.
 
 Members 3 and 4 must reproduce the same ordering and selection. `metrics_consistency_errors` checks that the per-year counts in `metrics.json` match Contract B exactly.
 

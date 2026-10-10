@@ -96,13 +96,17 @@ def main(argv=None) -> int:
             print(f"ERROR (Contract A): {error}", file=sys.stderr)
         return 2
 
-    result = run_evaluation(
-        pipe_year,
-        test_years=args.test_years,
-        seed=args.seed,
-        exclude_ambiguous=not args.include_ambiguous,
-        run_sensitivity=not args.no_sensitivity,
-    )
+    try:
+        result = run_evaluation(
+            pipe_year,
+            test_years=args.test_years,
+            seed=args.seed,
+            exclude_ambiguous=not args.include_ambiguous,
+            run_sensitivity=not args.no_sensitivity,
+        )
+    except ValueError as exc:  # e.g. an incomplete or unknown test year
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
 
     errors = (
         validate_fold_predictions(result.contract_b)
