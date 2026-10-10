@@ -6,14 +6,14 @@ then segment_id ascending. priority_rank and cumulative_length_m are
 deterministic. Equal-budget selection uses the cumulative network length.
 
 ## Action routing
-- LOW-confidence or OOD: INSPECT; verify evidence before capital decisions.
-- HIGH confidence and risk percentile >= 0.80: RENEWAL_REVIEW for human review.
-- Risk percentile >= 0.50: INSPECT.
+- HIGH confidence, not OOD, and at least 3 prior recorded breaks: RENEWAL_REVIEW.
+- LOW or MEDIUM confidence, or OOD: INSPECT.
+- 1–2 prior recorded breaks: INSPECT.
 - Otherwise: MONITOR.
 
-These are operational triage thresholds, not calibrated failure probabilities.
-RENEWAL_REVIEW is a human-reviewed recommendation, never an automatic
-renewal or replacement decision.
+Action routing uses historical information available before the score date.
+Risk percentile is a relative ranking, not a calibrated failure probability.
+RENEWAL_REVIEW is for human assessment, not an automatic replacement decision.
 
 ## Descriptive patterns
 Patterns summarize available records; they are not physical root causes.

@@ -61,37 +61,69 @@ def risk_pattern(row):
     return "General risk profile"
 
 
-def action_and_reason(row):
-    """Conservative routing; no causal claims."""
-    confidence = str(row["confidence_label"]).upper()
-    percentile = float(row["risk_percentile"])
 
-    if confidence == "LOW" or bool(row["is_ood"]):
+def action_and_reason(row):
+    """Route actions using confidence, OOD status, and prior-break history."""
+    confidence = str(row["confidence_label"]).strip().upper()
+    is_ood = bool(row["is_ood"])
+    prior_break_count = int(row["prior_break_count"])
+
+    if (
+        confidence == "HIGH"
+        and not is_ood
+        and prior_break_count >= 3
+    ):
+        return (
+            "RENEWAL_REVIEW",
+            "High confidence and at least three prior recorded breaks; "
+            "refer for human-reviewed renewal assessment.",
+        )
+
+    if confidence in {"LOW", "MEDIUM"} or is_ood:
         return (
             "INSPECT",
             "Evidence is limited or unfamiliar; inspect and verify "
             "the asset record before capital decisions.",
         )
 
-    if confidence == "HIGH" and percentile >= 0.80:
-        return (
-            "RENEWAL_REVIEW",
-            "High relative risk ranking with high confidence; "
-            "refer for human-reviewed renewal assessment.",
-        )
-
-    if percentile >= 0.50:
+    if prior_break_count in {1, 2}:
         return (
             "INSPECT",
-            "Elevated relative risk ranking; inspect and verify "
+            "One or two prior recorded breaks; inspect and verify "
             "before deciding on further action.",
         )
 
     return (
         "MONITOR",
-        "Lower relative risk ranking; continue routine monitoring "
+        "No repeated-break threshold met; continue routine monitoring "
         "and reassess as new evidence becomes available.",
     )
+
+
+def recommend_action(row):
+    confidence = str(row["confidence_label"]).strip().upper()
+    is_ood = bool(row["is_ood"])
+    prior_break_count = int(row["prior_break_count"])
+
+    # 1. Renewal review requires strong confidence and repeated history.
+    if (
+        confidence == "HIGH"
+        and not is_ood
+        and prior_break_count >= 3
+    ):
+        return "RENEWAL_REVIEW"
+
+    # 2. Uncertain or out-of-distribution pipes need inspection first.
+    if confidence in {"LOW", "MEDIUM"} or is_ood:
+        return "INSPECT"
+
+    # 3. Some prior-break evidence warrants inspection.
+    if prior_break_count in {1, 2}:
+        return "INSPECT"
+
+    # 4. Everything else is monitored.
+    return "MONITOR"
+
 
 
 def main():
@@ -114,12 +146,13 @@ def main():
     if "nearby_prior_breaks" in a.columns:
         a_fields.append("nearby_prior_breaks")
 
-    a_join = a[[c for c in a_fields if c in a.columns]].copy()
+    a_join = a[a_fields].copy()
+
     a_join = a_join.rename(columns={"score_year": "test_year"})
 
     if a_join.duplicated(["segment_id", "test_year"]).any():
-        raise ValueError("Contract A has duplicate segment/year keys.")
-
+        raise ValueError("Contract A has duplicate segment_id/test_year rows")
+    
     joined = b.merge(
         a_join,
         on=["segment_id", "test_year"],
@@ -157,6 +190,7 @@ def main():
         group["cumulative_length_m"] = group["length_m"].astype(float).cumsum()
 
         for _, row in group.iterrows():
+            action, reason = action_and_reason(row)
             pattern = risk_pattern(row)
             action, reason = action_and_reason(row)
 
@@ -276,14 +310,14 @@ then segment_id ascending. priority_rank and cumulative_length_m are
 deterministic. Equal-budget selection uses the cumulative network length.
 
 ## Action routing
-- LOW-confidence or OOD: INSPECT; verify evidence before capital decisions.
-- HIGH confidence and risk percentile >= 0.80: RENEWAL_REVIEW for human review.
-- Risk percentile >= 0.50: INSPECT.
+- HIGH confidence, not OOD, and at least 3 prior recorded breaks: RENEWAL_REVIEW.
+- LOW or MEDIUM confidence, or OOD: INSPECT.
+- 1–2 prior recorded breaks: INSPECT.
 - Otherwise: MONITOR.
 
-These are operational triage thresholds, not calibrated failure probabilities.
-RENEWAL_REVIEW is a human-reviewed recommendation, never an automatic
-renewal or replacement decision.
+Action routing uses historical information available before the score date.
+Risk percentile is a relative ranking, not a calibrated failure probability.
+RENEWAL_REVIEW is for human assessment, not an automatic replacement decision.
 
 ## Descriptive patterns
 Patterns summarize available records; they are not physical root causes.
