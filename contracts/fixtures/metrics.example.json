@@ -1,0 +1,983 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-10T06:13:40+00:00",
+  "data_snapshot": "SYNTHETIC-FIXTURE",
+  "is_synthetic": true,
+  "selection_unit": "network_length_fraction",
+  "selection_rule": "within each test_year and method, sort by risk_percentile descending then segment_id ascending; select the longest prefix whose cumulative length_m does not exceed budget x total length_m of that year's eligible segments",
+  "champion_method": "logistic",
+  "champion_selection_rule": "highest mean capture_at_05 across test years among non-random methods; ties (equal to 4 d.p.) go to the simpler method",
+  "candidate_methods": [
+    "oldest",
+    "prior_breaks",
+    "lookup",
+    "logistic"
+  ],
+  "test_years": [
+    2021,
+    2022,
+    2023
+  ],
+  "budgets": [
+    0.01,
+    0.02,
+    0.05,
+    0.1
+  ],
+  "primary_budget": 0.05,
+  "aggregation": {
+    "capture_at_XX": "mean across test years (years without recorded breaks are skipped)",
+    "precision_at_XX": "mean across test years",
+    "observed_non_events_at_XX": "sum across test years"
+  },
+  "methods": {
+    "logistic": {
+      "capture_at_01": 0.046633,
+      "precision_at_01": 1.0,
+      "observed_non_events_at_01": 0,
+      "capture_at_02": 0.078283,
+      "precision_at_02": 1.0,
+      "observed_non_events_at_02": 0,
+      "capture_at_05": 0.233165,
+      "precision_at_05": 0.625,
+      "observed_non_events_at_05": 18,
+      "capture_at_10": 0.373064,
+      "precision_at_10": 0.393496,
+      "observed_non_events_at_10": 74,
+      "capture_at_05_std": 0.014797,
+      "capture_at_05_min": 0.222222,
+      "capture_at_05_max": 0.25,
+      "pr_auc_mean": 0.445519,
+      "lift_vs_oldest_at_05": 1.5038,
+      "lift_vs_random_at_05": 5.082569,
+      "years_beating_oldest_at_05": 3
+    },
+    "lookup": {
+      "capture_at_01": 0.062542,
+      "precision_at_01": 0.380952,
+      "observed_non_events_at_01": 13,
+      "capture_at_02": 0.108418,
+      "precision_at_02": 0.358974,
+      "observed_non_events_at_02": 25,
+      "capture_at_05": 0.169865,
+      "precision_at_05": 0.278253,
+      "observed_non_events_at_05": 57,
+      "capture_at_10": 0.393519,
+      "precision_at_10": 0.316329,
+      "observed_non_events_at_10": 110,
+      "capture_at_05_std": 0.017322,
+      "capture_at_05_min": 0.15,
+      "capture_at_05_max": 0.181818,
+      "pr_auc_mean": 0.295018,
+      "lift_vs_oldest_at_05": 1.095548,
+      "lift_vs_random_at_05": 3.702752,
+      "years_beating_oldest_at_05": 1
+    },
+    "oldest": {
+      "capture_at_01": 0.030892,
+      "precision_at_01": 0.222222,
+      "observed_non_events_at_01": 14,
+      "capture_at_02": 0.069192,
+      "precision_at_02": 0.25,
+      "observed_non_events_at_02": 27,
+      "capture_at_05": 0.155051,
+      "precision_at_05": 0.208333,
+      "observed_non_events_at_05": 76,
+      "capture_at_10": 0.308586,
+      "precision_at_10": 0.218579,
+      "observed_non_events_at_10": 143,
+      "capture_at_05_std": 0.024634,
+      "capture_at_05_min": 0.133333,
+      "capture_at_05_max": 0.181818,
+      "pr_auc_mean": 0.20299,
+      "lift_vs_oldest_at_05": 1.0,
+      "lift_vs_random_at_05": 3.379817,
+      "years_beating_oldest_at_05": 0
+    },
+    "prior_breaks": {
+      "capture_at_01": 0.046633,
+      "precision_at_01": 1.0,
+      "observed_non_events_at_01": 0,
+      "capture_at_02": 0.086616,
+      "precision_at_02": 0.611111,
+      "observed_non_events_at_02": 7,
+      "capture_at_05": 0.211532,
+      "precision_at_05": 0.520697,
+      "observed_non_events_at_05": 25,
+      "capture_at_10": 0.412879,
+      "precision_at_10": 0.392593,
+      "observed_non_events_at_10": 82,
+      "capture_at_05_std": 0.055002,
+      "capture_at_05_min": 0.177778,
+      "capture_at_05_max": 0.275,
+      "pr_auc_mean": 0.393338,
+      "lift_vs_oldest_at_05": 1.364278,
+      "lift_vs_random_at_05": 4.611009,
+      "years_beating_oldest_at_05": 2
+    },
+    "random": {
+      "capture_at_01": 0.0,
+      "precision_at_01": 0.0,
+      "observed_non_events_at_01": 17,
+      "capture_at_02": 0.015152,
+      "precision_at_02": 0.074074,
+      "observed_non_events_at_02": 29,
+      "capture_at_05": 0.045875,
+      "precision_at_05": 0.074518,
+      "observed_non_events_at_05": 73,
+      "capture_at_10": 0.090825,
+      "precision_at_10": 0.067654,
+      "observed_non_events_at_10": 161,
+      "capture_at_05_std": 0.021626,
+      "capture_at_05_min": 0.025,
+      "capture_at_05_max": 0.068182,
+      "pr_auc_mean": 0.077645,
+      "lift_vs_oldest_at_05": 0.295874,
+      "lift_vs_random_at_05": 1.0,
+      "years_beating_oldest_at_05": 0
+    },
+    "champion": {
+      "capture_at_01": 0.046633,
+      "precision_at_01": 1.0,
+      "observed_non_events_at_01": 0,
+      "capture_at_02": 0.078283,
+      "precision_at_02": 1.0,
+      "observed_non_events_at_02": 0,
+      "capture_at_05": 0.233165,
+      "precision_at_05": 0.625,
+      "observed_non_events_at_05": 18,
+      "capture_at_10": 0.373064,
+      "precision_at_10": 0.393496,
+      "observed_non_events_at_10": 74,
+      "capture_at_05_std": 0.014797,
+      "capture_at_05_min": 0.222222,
+      "capture_at_05_max": 0.25,
+      "pr_auc_mean": 0.445519,
+      "lift_vs_oldest_at_05": 1.5038,
+      "lift_vs_random_at_05": 5.082569,
+      "years_beating_oldest_at_05": 3
+    }
+  },
+  "by_year": {
+    "2021": {
+      "summary": {
+        "eligible_segments": 596,
+        "network_length_m": 78148.3,
+        "total_breaks": 40
+      },
+      "budget_0.01": {
+        "logistic": {
+          "budget_length_m": 781.483,
+          "selected_segments": 2,
+          "selected_length_m": 666.2,
+          "breaks_captured": 2,
+          "total_breaks": 40,
+          "capture": 0.05,
+          "precision": 1.0,
+          "observed_non_events": 0
+        },
+        "lookup": {
+          "budget_length_m": 781.483,
+          "selected_segments": 7,
+          "selected_length_m": 705.8,
+          "breaks_captured": 3,
+          "total_breaks": 40,
+          "capture": 0.075,
+          "precision": 0.428571,
+          "observed_non_events": 4
+        },
+        "oldest": {
+          "budget_length_m": 781.483,
+          "selected_segments": 6,
+          "selected_length_m": 729.4,
+          "breaks_captured": 1,
+          "total_breaks": 40,
+          "capture": 0.025,
+          "precision": 0.166667,
+          "observed_non_events": 5
+        },
+        "prior_breaks": {
+          "budget_length_m": 781.483,
+          "selected_segments": 2,
+          "selected_length_m": 666.2,
+          "breaks_captured": 2,
+          "total_breaks": 40,
+          "capture": 0.05,
+          "precision": 1.0,
+          "observed_non_events": 0
+        },
+        "random": {
+          "budget_length_m": 781.483,
+          "selected_segments": 5,
+          "selected_length_m": 619.6,
+          "breaks_captured": 0,
+          "total_breaks": 40,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 5
+        },
+        "champion": {
+          "budget_length_m": 781.483,
+          "selected_segments": 2,
+          "selected_length_m": 666.2,
+          "breaks_captured": 2,
+          "total_breaks": 40,
+          "capture": 0.05,
+          "precision": 1.0,
+          "observed_non_events": 0
+        }
+      },
+      "budget_0.02": {
+        "logistic": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 4,
+          "selected_length_m": 1302.1,
+          "breaks_captured": 4,
+          "total_breaks": 40,
+          "capture": 0.1,
+          "precision": 1.0,
+          "observed_non_events": 0
+        },
+        "lookup": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 13,
+          "selected_length_m": 1507.1,
+          "breaks_captured": 4,
+          "total_breaks": 40,
+          "capture": 0.1,
+          "precision": 0.307692,
+          "observed_non_events": 9
+        },
+        "oldest": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 12,
+          "selected_length_m": 1556.5,
+          "breaks_captured": 2,
+          "total_breaks": 40,
+          "capture": 0.05,
+          "precision": 0.166667,
+          "observed_non_events": 10
+        },
+        "prior_breaks": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 6,
+          "selected_length_m": 1404.2,
+          "breaks_captured": 5,
+          "total_breaks": 40,
+          "capture": 0.125,
+          "precision": 0.833333,
+          "observed_non_events": 1
+        },
+        "random": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 9,
+          "selected_length_m": 1476.9,
+          "breaks_captured": 0,
+          "total_breaks": 40,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 9
+        },
+        "champion": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 4,
+          "selected_length_m": 1302.1,
+          "breaks_captured": 4,
+          "total_breaks": 40,
+          "capture": 0.1,
+          "precision": 1.0,
+          "observed_non_events": 0
+        }
+      },
+      "budget_0.05": {
+        "logistic": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 16,
+          "selected_length_m": 3893.8,
+          "breaks_captured": 10,
+          "total_breaks": 40,
+          "capture": 0.25,
+          "precision": 0.625,
+          "observed_non_events": 6
+        },
+        "lookup": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 26,
+          "selected_length_m": 3813.6,
+          "breaks_captured": 6,
+          "total_breaks": 40,
+          "capture": 0.15,
+          "precision": 0.230769,
+          "observed_non_events": 20
+        },
+        "oldest": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 32,
+          "selected_length_m": 3842.1,
+          "breaks_captured": 6,
+          "total_breaks": 40,
+          "capture": 0.15,
+          "precision": 0.1875,
+          "observed_non_events": 26
+        },
+        "prior_breaks": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 17,
+          "selected_length_m": 3809.4,
+          "breaks_captured": 11,
+          "total_breaks": 40,
+          "capture": 0.275,
+          "precision": 0.647059,
+          "observed_non_events": 6
+        },
+        "random": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 23,
+          "selected_length_m": 3868.6,
+          "breaks_captured": 1,
+          "total_breaks": 40,
+          "capture": 0.025,
+          "precision": 0.043478,
+          "observed_non_events": 22
+        },
+        "champion": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 16,
+          "selected_length_m": 3893.8,
+          "breaks_captured": 10,
+          "total_breaks": 40,
+          "capture": 0.25,
+          "precision": 0.625,
+          "observed_non_events": 6
+        }
+      },
+      "budget_0.10": {
+        "logistic": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 41,
+          "selected_length_m": 7781.7,
+          "breaks_captured": 16,
+          "total_breaks": 40,
+          "capture": 0.4,
+          "precision": 0.390244,
+          "observed_non_events": 25
+        },
+        "lookup": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 53,
+          "selected_length_m": 7701.8,
+          "breaks_captured": 13,
+          "total_breaks": 40,
+          "capture": 0.325,
+          "precision": 0.245283,
+          "observed_non_events": 40
+        },
+        "oldest": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 61,
+          "selected_length_m": 7770.7,
+          "breaks_captured": 10,
+          "total_breaks": 40,
+          "capture": 0.25,
+          "precision": 0.163934,
+          "observed_non_events": 51
+        },
+        "prior_breaks": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 45,
+          "selected_length_m": 7731.9,
+          "breaks_captured": 19,
+          "total_breaks": 40,
+          "capture": 0.475,
+          "precision": 0.422222,
+          "observed_non_events": 26
+        },
+        "random": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 53,
+          "selected_length_m": 7686.5,
+          "breaks_captured": 1,
+          "total_breaks": 40,
+          "capture": 0.025,
+          "precision": 0.018868,
+          "observed_non_events": 52
+        },
+        "champion": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 41,
+          "selected_length_m": 7781.7,
+          "breaks_captured": 16,
+          "total_breaks": 40,
+          "capture": 0.4,
+          "precision": 0.390244,
+          "observed_non_events": 25
+        }
+      },
+      "pr_auc": {
+        "logistic": 0.458996,
+        "lookup": 0.263744,
+        "oldest": 0.171198,
+        "prior_breaks": 0.438723,
+        "random": 0.060075,
+        "champion": 0.458996
+      }
+    },
+    "2022": {
+      "summary": {
+        "eligible_segments": 596,
+        "network_length_m": 78148.3,
+        "total_breaks": 44
+      },
+      "budget_0.01": {
+        "logistic": {
+          "budget_length_m": 781.483,
+          "selected_segments": 2,
+          "selected_length_m": 666.2,
+          "breaks_captured": 2,
+          "total_breaks": 44,
+          "capture": 0.045455,
+          "precision": 1.0,
+          "observed_non_events": 0
+        },
+        "lookup": {
+          "budget_length_m": 781.483,
+          "selected_segments": 7,
+          "selected_length_m": 705.8,
+          "breaks_captured": 3,
+          "total_breaks": 44,
+          "capture": 0.068182,
+          "precision": 0.428571,
+          "observed_non_events": 4
+        },
+        "oldest": {
+          "budget_length_m": 781.483,
+          "selected_segments": 6,
+          "selected_length_m": 729.4,
+          "breaks_captured": 2,
+          "total_breaks": 44,
+          "capture": 0.045455,
+          "precision": 0.333333,
+          "observed_non_events": 4
+        },
+        "prior_breaks": {
+          "budget_length_m": 781.483,
+          "selected_segments": 2,
+          "selected_length_m": 666.2,
+          "breaks_captured": 2,
+          "total_breaks": 44,
+          "capture": 0.045455,
+          "precision": 1.0,
+          "observed_non_events": 0
+        },
+        "random": {
+          "budget_length_m": 781.483,
+          "selected_segments": 4,
+          "selected_length_m": 615.7,
+          "breaks_captured": 0,
+          "total_breaks": 44,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 4
+        },
+        "champion": {
+          "budget_length_m": 781.483,
+          "selected_segments": 2,
+          "selected_length_m": 666.2,
+          "breaks_captured": 2,
+          "total_breaks": 44,
+          "capture": 0.045455,
+          "precision": 1.0,
+          "observed_non_events": 0
+        }
+      },
+      "budget_0.02": {
+        "logistic": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 3,
+          "selected_length_m": 977.9,
+          "breaks_captured": 3,
+          "total_breaks": 44,
+          "capture": 0.068182,
+          "precision": 1.0,
+          "observed_non_events": 0
+        },
+        "lookup": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 13,
+          "selected_length_m": 1507.1,
+          "breaks_captured": 6,
+          "total_breaks": 44,
+          "capture": 0.136364,
+          "precision": 0.461538,
+          "observed_non_events": 7
+        },
+        "oldest": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 12,
+          "selected_length_m": 1556.5,
+          "breaks_captured": 4,
+          "total_breaks": 44,
+          "capture": 0.090909,
+          "precision": 0.333333,
+          "observed_non_events": 8
+        },
+        "prior_breaks": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 6,
+          "selected_length_m": 1404.2,
+          "breaks_captured": 3,
+          "total_breaks": 44,
+          "capture": 0.068182,
+          "precision": 0.5,
+          "observed_non_events": 3
+        },
+        "random": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 9,
+          "selected_length_m": 1386.0,
+          "breaks_captured": 2,
+          "total_breaks": 44,
+          "capture": 0.045455,
+          "precision": 0.222222,
+          "observed_non_events": 7
+        },
+        "champion": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 3,
+          "selected_length_m": 977.9,
+          "breaks_captured": 3,
+          "total_breaks": 44,
+          "capture": 0.068182,
+          "precision": 1.0,
+          "observed_non_events": 0
+        }
+      },
+      "budget_0.05": {
+        "logistic": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 16,
+          "selected_length_m": 3862.4,
+          "breaks_captured": 10,
+          "total_breaks": 44,
+          "capture": 0.227273,
+          "precision": 0.625,
+          "observed_non_events": 6
+        },
+        "lookup": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 27,
+          "selected_length_m": 3829.3,
+          "breaks_captured": 8,
+          "total_breaks": 44,
+          "capture": 0.181818,
+          "precision": 0.296296,
+          "observed_non_events": 19
+        },
+        "oldest": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 32,
+          "selected_length_m": 3842.1,
+          "breaks_captured": 8,
+          "total_breaks": 44,
+          "capture": 0.181818,
+          "precision": 0.25,
+          "observed_non_events": 24
+        },
+        "prior_breaks": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 18,
+          "selected_length_m": 3837.6,
+          "breaks_captured": 8,
+          "total_breaks": 44,
+          "capture": 0.181818,
+          "precision": 0.444444,
+          "observed_non_events": 10
+        },
+        "random": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 27,
+          "selected_length_m": 3834.5,
+          "breaks_captured": 3,
+          "total_breaks": 44,
+          "capture": 0.068182,
+          "precision": 0.111111,
+          "observed_non_events": 24
+        },
+        "champion": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 16,
+          "selected_length_m": 3862.4,
+          "breaks_captured": 10,
+          "total_breaks": 44,
+          "capture": 0.227273,
+          "precision": 0.625,
+          "observed_non_events": 6
+        }
+      },
+      "budget_0.10": {
+        "logistic": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 41,
+          "selected_length_m": 7577.7,
+          "breaks_captured": 16,
+          "total_breaks": 44,
+          "capture": 0.363636,
+          "precision": 0.390244,
+          "observed_non_events": 25
+        },
+        "lookup": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 54,
+          "selected_length_m": 7702.3,
+          "breaks_captured": 22,
+          "total_breaks": 44,
+          "capture": 0.5,
+          "precision": 0.407407,
+          "observed_non_events": 32
+        },
+        "oldest": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 61,
+          "selected_length_m": 7770.7,
+          "breaks_captured": 18,
+          "total_breaks": 44,
+          "capture": 0.409091,
+          "precision": 0.295082,
+          "observed_non_events": 43
+        },
+        "prior_breaks": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 45,
+          "selected_length_m": 7715.1,
+          "breaks_captured": 16,
+          "total_breaks": 44,
+          "capture": 0.363636,
+          "precision": 0.355556,
+          "observed_non_events": 29
+        },
+        "random": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 58,
+          "selected_length_m": 7685.8,
+          "breaks_captured": 6,
+          "total_breaks": 44,
+          "capture": 0.136364,
+          "precision": 0.103448,
+          "observed_non_events": 52
+        },
+        "champion": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 41,
+          "selected_length_m": 7577.7,
+          "breaks_captured": 16,
+          "total_breaks": 44,
+          "capture": 0.363636,
+          "precision": 0.390244,
+          "observed_non_events": 25
+        }
+      },
+      "pr_auc": {
+        "logistic": 0.455896,
+        "lookup": 0.35537,
+        "oldest": 0.249657,
+        "prior_breaks": 0.391868,
+        "random": 0.093858,
+        "champion": 0.455896
+      }
+    },
+    "2023": {
+      "summary": {
+        "eligible_segments": 596,
+        "network_length_m": 78148.3,
+        "total_breaks": 45
+      },
+      "budget_0.01": {
+        "logistic": {
+          "budget_length_m": 781.483,
+          "selected_segments": 2,
+          "selected_length_m": 666.2,
+          "breaks_captured": 2,
+          "total_breaks": 45,
+          "capture": 0.044444,
+          "precision": 1.0,
+          "observed_non_events": 0
+        },
+        "lookup": {
+          "budget_length_m": 781.483,
+          "selected_segments": 7,
+          "selected_length_m": 705.8,
+          "breaks_captured": 2,
+          "total_breaks": 45,
+          "capture": 0.044444,
+          "precision": 0.285714,
+          "observed_non_events": 5
+        },
+        "oldest": {
+          "budget_length_m": 781.483,
+          "selected_segments": 6,
+          "selected_length_m": 729.4,
+          "breaks_captured": 1,
+          "total_breaks": 45,
+          "capture": 0.022222,
+          "precision": 0.166667,
+          "observed_non_events": 5
+        },
+        "prior_breaks": {
+          "budget_length_m": 781.483,
+          "selected_segments": 2,
+          "selected_length_m": 666.2,
+          "breaks_captured": 2,
+          "total_breaks": 45,
+          "capture": 0.044444,
+          "precision": 1.0,
+          "observed_non_events": 0
+        },
+        "random": {
+          "budget_length_m": 781.483,
+          "selected_segments": 8,
+          "selected_length_m": 694.7,
+          "breaks_captured": 0,
+          "total_breaks": 45,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 8
+        },
+        "champion": {
+          "budget_length_m": 781.483,
+          "selected_segments": 2,
+          "selected_length_m": 666.2,
+          "breaks_captured": 2,
+          "total_breaks": 45,
+          "capture": 0.044444,
+          "precision": 1.0,
+          "observed_non_events": 0
+        }
+      },
+      "budget_0.02": {
+        "logistic": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 3,
+          "selected_length_m": 977.9,
+          "breaks_captured": 3,
+          "total_breaks": 45,
+          "capture": 0.066667,
+          "precision": 1.0,
+          "observed_non_events": 0
+        },
+        "lookup": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 13,
+          "selected_length_m": 1507.1,
+          "breaks_captured": 4,
+          "total_breaks": 45,
+          "capture": 0.088889,
+          "precision": 0.307692,
+          "observed_non_events": 9
+        },
+        "oldest": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 12,
+          "selected_length_m": 1556.5,
+          "breaks_captured": 3,
+          "total_breaks": 45,
+          "capture": 0.066667,
+          "precision": 0.25,
+          "observed_non_events": 9
+        },
+        "prior_breaks": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 6,
+          "selected_length_m": 1404.2,
+          "breaks_captured": 3,
+          "total_breaks": 45,
+          "capture": 0.066667,
+          "precision": 0.5,
+          "observed_non_events": 3
+        },
+        "random": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 13,
+          "selected_length_m": 1325.1,
+          "breaks_captured": 0,
+          "total_breaks": 45,
+          "capture": 0.0,
+          "precision": 0.0,
+          "observed_non_events": 13
+        },
+        "champion": {
+          "budget_length_m": 1562.966,
+          "selected_segments": 3,
+          "selected_length_m": 977.9,
+          "breaks_captured": 3,
+          "total_breaks": 45,
+          "capture": 0.066667,
+          "precision": 1.0,
+          "observed_non_events": 0
+        }
+      },
+      "budget_0.05": {
+        "logistic": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 16,
+          "selected_length_m": 3862.4,
+          "breaks_captured": 10,
+          "total_breaks": 45,
+          "capture": 0.222222,
+          "precision": 0.625,
+          "observed_non_events": 6
+        },
+        "lookup": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 26,
+          "selected_length_m": 3675.8,
+          "breaks_captured": 8,
+          "total_breaks": 45,
+          "capture": 0.177778,
+          "precision": 0.307692,
+          "observed_non_events": 18
+        },
+        "oldest": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 32,
+          "selected_length_m": 3842.1,
+          "breaks_captured": 6,
+          "total_breaks": 45,
+          "capture": 0.133333,
+          "precision": 0.1875,
+          "observed_non_events": 26
+        },
+        "prior_breaks": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 17,
+          "selected_length_m": 3809.4,
+          "breaks_captured": 8,
+          "total_breaks": 45,
+          "capture": 0.177778,
+          "precision": 0.470588,
+          "observed_non_events": 9
+        },
+        "random": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 29,
+          "selected_length_m": 3894.4,
+          "breaks_captured": 2,
+          "total_breaks": 45,
+          "capture": 0.044444,
+          "precision": 0.068966,
+          "observed_non_events": 27
+        },
+        "champion": {
+          "budget_length_m": 3907.415,
+          "selected_segments": 16,
+          "selected_length_m": 3862.4,
+          "breaks_captured": 10,
+          "total_breaks": 45,
+          "capture": 0.222222,
+          "precision": 0.625,
+          "observed_non_events": 6
+        }
+      },
+      "budget_0.10": {
+        "logistic": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 40,
+          "selected_length_m": 7546.1,
+          "breaks_captured": 16,
+          "total_breaks": 45,
+          "capture": 0.355556,
+          "precision": 0.4,
+          "observed_non_events": 24
+        },
+        "lookup": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 54,
+          "selected_length_m": 7563.8,
+          "breaks_captured": 16,
+          "total_breaks": 45,
+          "capture": 0.355556,
+          "precision": 0.296296,
+          "observed_non_events": 38
+        },
+        "oldest": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 61,
+          "selected_length_m": 7770.7,
+          "breaks_captured": 12,
+          "total_breaks": 45,
+          "capture": 0.266667,
+          "precision": 0.196721,
+          "observed_non_events": 49
+        },
+        "prior_breaks": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 45,
+          "selected_length_m": 7742.1,
+          "breaks_captured": 18,
+          "total_breaks": 45,
+          "capture": 0.4,
+          "precision": 0.4,
+          "observed_non_events": 27
+        },
+        "random": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 62,
+          "selected_length_m": 7727.2,
+          "breaks_captured": 5,
+          "total_breaks": 45,
+          "capture": 0.111111,
+          "precision": 0.080645,
+          "observed_non_events": 57
+        },
+        "champion": {
+          "budget_length_m": 7814.83,
+          "selected_segments": 40,
+          "selected_length_m": 7546.1,
+          "breaks_captured": 16,
+          "total_breaks": 45,
+          "capture": 0.355556,
+          "precision": 0.4,
+          "observed_non_events": 24
+        }
+      },
+      "pr_auc": {
+        "logistic": 0.421666,
+        "lookup": 0.265941,
+        "oldest": 0.188114,
+        "prior_breaks": 0.349423,
+        "random": 0.079003,
+        "champion": 0.421666
+      }
+    }
+  },
+  "sensitivity": {
+    "ambiguous_rows": 58,
+    "variant": "ambiguous histories included",
+    "capture_at_05": {
+      "logistic": 0.235808,
+      "lookup": 0.180987,
+      "oldest": 0.151518,
+      "prior_breaks": 0.222038,
+      "random": 0.044845
+    }
+  },
+  "inputs": {
+    "contract_a_rows": 9191,
+    "panel_rows": 9133,
+    "ambiguous_histories": "excluded",
+    "score_years": [
+      2008,
+      2023
+    ],
+    "seed": 2026
+  },
+  "limitations": [
+    "SYNTHETIC FIXTURE DATA: these numbers are schema examples, not results. Never show them on slides or in Proof Mode.",
+    "Capture counts segments with at least one recorded break in the test year, not individual break events.",
+    "A selected segment without a recorded break is an observed non-event, not proof that acting on it was unnecessary.",
+    "Results measure targeting quality at a fixed network-length budget, not breaks prevented or money saved.",
+    "risk_percentile is a within-year ranking, not a calibrated probability.",
+    "The random baseline is a single seeded draw per test year.",
+    "Features come from a current-inventory snapshot; pipes replaced before the snapshot are absent (survivorship). See docs/data-card.md.",
+    "Validated on City of Kitchener open data only; performance in Malaysia is untested."
+  ]
+}

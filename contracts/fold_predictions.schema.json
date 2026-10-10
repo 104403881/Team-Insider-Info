@@ -1,0 +1,50 @@
+{
+  "contract": "B",
+  "name": "fold_predictions",
+  "schema_version": "1.0",
+  "owner": "Member 2 (ML & Evaluation)",
+  "consumers": ["Member 3 (Decision Engine)", "Member 4 (Product & Demo)"],
+  "artifact": "artifacts/fold_predictions.parquet",
+  "fixture": "contracts/fixtures/fold_predictions.fixture.parquet",
+  "grain": "one row per segment_id x test_year x method (long format)",
+  "primary_key": ["segment_id", "test_year", "method"],
+  "ordering": {
+    "within": ["test_year", "method"],
+    "sort_by": [
+      {"column": "risk_percentile", "descending": true},
+      {"column": "segment_id", "descending": false}
+    ]
+  },
+  "budget_selection": "Walk the ordering and keep the longest prefix whose cumulative length_m does not exceed budget x the total length_m of that test_year's rows for the method. Stop at the first segment that would overflow; do not skip ahead to fill the gap.",
+  "invariants": [
+    "every test_year contains all four methods",
+    "within a test_year every method ranks the same set of segment_ids, so every method receives the same length budget",
+    "actual_break and length_m are identical across methods for the same segment_id and test_year",
+    "champion rows are a copy of the predictions of metrics.json champion_method"
+  ],
+  "columns": [
+    {"name": "segment_id", "type": "string", "required": true, "nullable": false,
+     "description": "Stable pipe identifier; joins to Contract A segment_id"},
+    {"name": "test_year", "type": "integer", "required": true, "nullable": false,
+     "description": "Historical Proof Mode year; joins to Contract A score_year"},
+    {"name": "method", "type": "string", "required": true, "nullable": false,
+     "enum": ["random", "oldest", "prior_breaks", "champion"],
+     "description": "Ranking method; the champion's real name is metrics.json champion_method"},
+    {"name": "model_score", "type": "float", "required": true, "nullable": false,
+     "description": "Raw ranking score; larger means higher risk; not comparable across methods"},
+    {"name": "risk_percentile", "type": "float", "required": true, "nullable": false,
+     "minimum": 0, "maximum": 1,
+     "description": "Within test_year and method, average-rank percentile of model_score; larger means higher risk; tied scores share a percentile"},
+    {"name": "confidence_label", "type": "string", "required": true, "nullable": false,
+     "enum": ["HIGH", "MEDIUM", "LOW"],
+     "description": "Evidence support for the segment from training years only; identical across methods within a test_year"},
+    {"name": "is_ood", "type": "boolean", "required": true, "nullable": false,
+     "description": "Unfamiliar or data-poor record: unseen/UNKNOWN material, missing age, or age outside the training range"},
+    {"name": "actual_break", "type": "integer", "required": true, "nullable": false,
+     "enum": [0, 1],
+     "description": "1 if the segment had at least one recorded break during test_year; hide until the Proof Mode reveal"},
+    {"name": "length_m", "type": "float", "required": true, "nullable": false,
+     "exclusiveMinimum": 0,
+     "description": "Segment length; the equal-budget selection unit"}
+  ]
+}
