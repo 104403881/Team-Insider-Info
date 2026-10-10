@@ -81,14 +81,13 @@ def test_ood_blocked_from_renewal(predictions):
 
     assert renewal_review_eligible(row) is False
 
-
-def test_actual_break_hidden(predictions):
+def test_actual_break_retained_for_proof_mode(predictions):
     result = build_ranked_worklist(
         predictions, 2025, 1.0
     )
 
-    assert "actual_break" not in result.columns
-
+    assert "actual_break" in result.columns
+    assert result["actual_break"].tolist() == [1, 0, 0]
 
 def test_invalid_percentile_rejected(predictions):
     predictions.loc[0, "risk_percentile"] = 1.5

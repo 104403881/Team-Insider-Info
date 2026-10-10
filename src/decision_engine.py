@@ -2,6 +2,8 @@
 """JagaPaip - Member 3: Decision & Explainability."""
 
 import math
+from numbers import Integral
+
 import pandas as pd
 
 REQUIRED_COLUMNS = {
@@ -113,8 +115,10 @@ def build_ranked_worklist(
 
     validate_contract_b(predictions)
 
-    if isinstance(test_year, bool) or not isinstance(test_year, int):
+    if isinstance(test_year, bool) or not isinstance(test_year, Integral):
         raise ValueError("test_year must be an integer.")
+
+    test_year = int(test_year)
 
     if (
         not math.isfinite(float(budget_fraction))
@@ -190,7 +194,6 @@ def build_ranked_worklist(
         axis=1,
     )
 
-    # Do not expose historical outcomes to the normal UI.
-    champion = champion.drop(columns=["actual_break"])
-
+# Keep actual_break for internal evaluation and Proof Mode.
+# The normal UI must hide this column until the reveal.
     return champion
