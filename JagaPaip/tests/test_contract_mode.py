@@ -10,7 +10,7 @@ from jagapaip.contract_proof import contract_budgets, contract_plan, contract_pl
 from jagapaip.loader import ROOT, load_dataset
 from jagapaip.proof import features_for_year
 from jagapaip.ranking import build_worklist
-from jagapaip.schema import ACTION_INSPECT, ACTION_PENDING, STRATEGY_JAGAPAIP
+from jagapaip.schema import ACTION_INSPECT, ACTION_MONITOR, ACTION_PENDING, ACTION_RENEWAL, STRATEGY_JAGAPAIP
 
 REPO_ARTIFACTS = ROOT.parent / "artifacts"
 
@@ -84,13 +84,16 @@ def test_actions_wait_for_contract_c(tmp_path):
 
 
 def test_actions_come_from_contract_c_when_published(tmp_path):
+    # Contract C uses codes; the app shows its own labels for them.
     worklist = pd.DataFrame(
         {"test_year": [2025] * 3, "method": ["champion"] * 3, "ranking_mode": ["VALIDATED_RISK"] * 3,
-         "segment_id": ["P1", "P2", "P3"], "recommended_action": [ACTION_INSPECT, "Monitor", "Monitor"]}
+         "segment_id": ["P1", "P2", "P3"], "recommended_action": ["INSPECT", "MONITOR", "RENEWAL_REVIEW"]}
     )
     write_project(tmp_path, worklist=worklist)
     plan = build_worklist(features_for_year(load_dataset(tmp_path), 2025), budget_m=1_000)
-    assert plan.set_index("pipe_id")["recommended_action"].to_dict() == {"P1": ACTION_INSPECT, "P2": "Monitor", "P3": "Monitor"}
+    assert plan.set_index("pipe_id")["recommended_action"].to_dict() == {
+        "P1": ACTION_INSPECT, "P2": ACTION_MONITOR, "P3": ACTION_RENEWAL
+    }
 
 
 def test_contract_plan_stops_at_first_overflow(tmp_path):

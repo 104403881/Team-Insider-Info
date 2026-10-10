@@ -158,6 +158,11 @@ python -m pytest tests/modeling
 python -m src.modeling.run_evaluation --member1-package data \
   --write-contract-a artifacts/pipe_year.parquet
 
+# integration smoke test for the H8/H12 gates (contracts A/B/C, metrics.json, app)
+python -m src.modeling.smoke               # about 25 s; exit code 1 on any FAIL
+python -m src.modeling.smoke --reproduce   # also rebuild B + metrics.json from data/ and compare (freeze check)
+python -m src.modeling.smoke --run-tests   # also run every lane's test suite
+
 # synthetic Contract B fixture for Members 3 and 4, plus the matching synthetic Contract A
 python -m src.modeling.run_evaluation --synthetic \
   --predictions-out contracts/fixtures/fold_predictions.fixture.parquet \

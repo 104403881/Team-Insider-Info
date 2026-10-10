@@ -9,6 +9,9 @@ import pandas as pd
 
 from jagapaip.demo_data import build_demo_tables
 from jagapaip.schema import (
+    ACTION_INSPECT,
+    ACTION_MONITOR,
+    ACTION_RENEWAL,
     BREAKS_CLEAN_FILE,
     CONTRACT_B_COLUMNS,
     CONTRACT_CHAMPION,
@@ -354,11 +357,14 @@ def attach_contract_actions(predictions: pd.DataFrame, worklists: pd.DataFrame |
         rows = rows.loc[rows["method"].astype(str) == CONTRACT_CHAMPION]
     if "ranking_mode" in rows.columns:
         rows = rows.loc[rows["ranking_mode"].astype(str) == "VALIDATED_RISK"]
+    # Contract C uses codes (MONITOR / INSPECT / RENEWAL_REVIEW); the UI shows labels.
+    labels = {"MONITOR": ACTION_MONITOR, "INSPECT": ACTION_INSPECT, "RENEWAL_REVIEW": ACTION_RENEWAL}
+    actions = rows["recommended_action"].astype(str).str.strip()
     rows = pd.DataFrame(
         {
             "pipe_id": rows["segment_id"].astype(str).to_numpy(),
             "year": pd.to_numeric(rows["test_year"], errors="coerce").astype(float).to_numpy(),
-            "contract_action": rows["recommended_action"].to_numpy(),
+            "contract_action": actions.map(lambda code: labels.get(code.upper(), code)).to_numpy(),
         }
     ).drop_duplicates(["pipe_id", "year"])
     merged = predictions.merge(rows, on=["pipe_id", "year"], how="left")
