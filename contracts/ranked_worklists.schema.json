@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JagaPaip Contract C - Ranked Worklists",
+  "version": "1.0",
+  "type": "object",
+  "description": "One row per segment, test year, method and ranking mode.",
+  "properties": {
+    "test_year": {
+      "type": "integer"
+    },
+    "method": {
+      "type": "string"
+    },
+    "ranking_mode": {
+      "type": "string",
+      "enum": [
+        "VALIDATED_RISK",
+        "SCENARIO_CONSEQUENCE"
+      ]
+    },
+    "segment_id": {
+      "type": "string"
+    },
+    "priority_rank": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "cumulative_length_m": {
+      "type": "number"
+    },
+    "risk_percentile": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "risk_pattern": {
+      "type": "string"
+    },
+    "confidence_label": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ]
+    },
+    "consequence_index": {
+      "type": "number",
+      "description": "Assumption-only field; 0.0 means no scenario applied."
+    },
+    "recommended_action": {
+      "type": "string",
+      "enum": [
+        "MONITOR",
+        "INSPECT",
+        "RENEWAL_REVIEW"
+      ]
+    },
+    "reason_short": {
+      "type": "string"
+    },
+    "actual_break": {
+      "type": "integer",
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "geometry_wkt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "test_year",
+    "method",
+    "ranking_mode",
+    "segment_id",
+    "priority_rank",
+    "cumulative_length_m",
+    "risk_percentile",
+    "risk_pattern",
+    "confidence_label",
+    "consequence_index",
+    "recommended_action",
+    "reason_short",
+    "actual_break"
+  ],
+  "additionalProperties": true
+}
