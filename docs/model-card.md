@@ -30,11 +30,12 @@ Input is Member 1's Contract A (`artifacts/pipe_year.parquet`). See `docs/data-c
 ## 4. Evaluation protocol
 
 1. **Walk-forward, expanding window.** Test year `Y` trains on every score year `< Y`. No random row split exists in result code, and a test enforces this.
-2. **Point-in-time features.** Contract A guarantees history features use only events before 1 Jan `Y`. Fitted preprocessing (imputation, scaling, encodings, lookup rates) is fitted inside each training fold.
-3. **Equal length budget.** Within a test year, every method ranks the same eligible segments. The budget is `budget x total length` of those segments, so every method gets exactly the same metres.
-4. **Ordering:** `risk_percentile` descending, then `segment_id` ascending.
-5. **Selection:** keep the longest prefix of that ordering whose cumulative `length_m` does not exceed the budget. Stop at the first overflow; do not skip ahead.
-6. **Budgets:** 1%, 2%, 5% and 10% of network length. The primary budget is 5%.
+2. **Complete years only.** Year `Y` counts only if `source_snapshot_date` is on or after 1 Jan `Y+1`. Later score years are dropped, and requesting one as a test year is an error. With the October 2026 Kitchener download, the last usable year is 2025. `metrics.json -> inputs` records `outcomes_complete_through` and the excluded years. Real data must carry a date snapshot.
+3. **Point-in-time features.** Contract A guarantees history features use only events before 1 Jan `Y`. Fitted preprocessing (imputation, scaling, encodings, lookup rates) is fitted inside each training fold.
+4. **Equal length budget.** Within a test year, every method ranks the same eligible segments. The budget is `budget x total length` of those segments, so every method gets exactly the same metres.
+5. **Ordering:** `risk_percentile` descending, then `segment_id` ascending.
+6. **Selection:** keep the longest prefix of that ordering whose cumulative `length_m` does not exceed the budget. Stop at the first overflow; do not skip ahead.
+7. **Budgets:** 1%, 2%, 5% and 10% of network length. The primary budget is 5%.
 
 Members 3 and 4 must reproduce the same ordering and selection. `metrics_consistency_errors` checks that the per-year counts in `metrics.json` match Contract B exactly.
 
@@ -84,6 +85,17 @@ Member 3's policy routes `LOW`/OOD rows to inspection, never to automatic renewa
 
 Capture counts segments with at least one break, not individual break events. An observed non-event is not proof that inspecting the segment was useless.
 
+**Uncertainty (`metrics.json -> uncertainty`).** This is a paired segment bootstrap: within each test year, segments are resampled with replacement (1,000 resamples) and every method is judged on the same resample.
+
+| Field | Meaning |
+|---|---|
+| `capture.budget_X.<method>.ci_mean` | 95% interval for the across-year mean capture |
+| `capture.budget_X.<method>.by_year` | 95% interval for each test year |
+| `difference_vs_oldest.budget_X.<method>.ci_mean` | 95% interval for (method - oldest) capture |
+| `share_of_resamples_above_zero` | how often the method beat oldest-first across resamples. This is a stability measure, not a p-value. |
+
+The interval covers segment-sampling noise within the observed years. It does not cover year-to-year change, the random baseline's single draw, or differences between Kitchener and Malaysia.
+
 ## 9. Results
 
 Read them from `artifacts/metrics.json`. The Contract B fixture in `contracts/fixtures/` is **synthetic** (`is_synthetic: true`): its numbers are schema examples and must never appear on slides.
@@ -98,9 +110,16 @@ Read them from `artifacts/metrics.json`. The Contract B fixture in `contracts/fi
 ## 10. Robustness (status)
 
 - [x] Ambiguous-history sensitivity (`metrics.json -> sensitivity`)
-- [ ] Mask 5% and 10% of non-critical feature values; measure capture change and rank stability
-- [ ] Unseen material mapped to `UNKNOWN` handled gracefully (unit-tested; stress run pending)
-- [ ] Bootstrap interval within each year
+- [x] Bootstrap intervals within and across test years (`metrics.json -> uncertainty`)
+- [x] Stress tests (`metrics.json -> robustness`). Models are fitted on clean training years; only test-year inputs are corrupted, and evaluation uses true lengths and outcomes.
+
+  | Scenario | Corruption |
+  |---|---|
+  | `mask_05`, `mask_10` | hide 5% / 10% of material, diameter, install year and nearby-break values |
+  | `unseen_material_05` | replace 5% of materials with a value never seen in training |
+  | `perturb_numeric` | install year off by up to 2 years; length off by up to 5% |
+
+  Each method reports `capture_at_05` and its change from clean, Spearman rank correlation with the clean scores, and overlap of the 5%-budget selection. `affected_rows_confidence` shows whether corrupted rows were downgraded (LOW/MEDIUM) instead of being trusted.
 - [ ] Spatial/corridor holdout, if the data supports it; otherwise list it as a limitation
 
 ## 11. Limitations

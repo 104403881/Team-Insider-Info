@@ -39,6 +39,11 @@ MEDIUM_SUPPORT = 30
 AGE_RANGE_TOLERANCE_YEARS = 5
 
 
+# Paired segment bootstrap within each test year.
+BOOTSTRAP_RESAMPLES = 1000
+CONFIDENCE_LEVEL = 0.95
+
+
 def budget_key(budget: float) -> str:
     """0.05 -> '05', as used in metric names such as capture_at_05."""
     return f"{round(budget * 100):02d}"

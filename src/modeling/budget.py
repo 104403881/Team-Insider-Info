@@ -74,6 +74,15 @@ def evaluate_budget(
     )
 
 
+def selected_segments(
+    group: pd.DataFrame, budget: float, score_col: str = "risk_percentile"
+) -> pd.Series:
+    """segment_ids inside the length budget, in ranking order."""
+    ordered = canonical_order(group, score_col)
+    lengths = ordered["length_m"].to_numpy(dtype=float)
+    return ordered["segment_id"][select_within_budget(lengths, budget * math.fsum(lengths))]
+
+
 def capture_at_budget(
     group: pd.DataFrame, budget: float, score_col: str = "risk_percentile"
 ) -> float | None:

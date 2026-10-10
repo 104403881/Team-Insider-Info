@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .config import PRIMARY_BUDGET, SEED, budget_key
+from .config import BOOTSTRAP_RESAMPLES, PRIMARY_BUDGET, SEED, budget_key, budget_label
 from .contracts import (
     metrics_consistency_errors,
     validate_fold_predictions,
@@ -29,7 +29,7 @@ from .contracts import (
     validate_pipe_year,
 )
 from .evaluate import run_evaluation
-from .synthetic import make_synthetic_pipe_year
+from .synthetic import DEFAULT_SEGMENTS, make_synthetic_pipe_year
 
 
 def parse_args(argv=None) -> argparse.Namespace:
@@ -37,13 +37,15 @@ def parse_args(argv=None) -> argparse.Namespace:
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--input", type=Path, help="Contract A parquet (pipe_year)")
     source.add_argument("--synthetic", action="store_true", help="use generated development data")
-    parser.add_argument("--synthetic-segments", type=int, default=600)
+    parser.add_argument("--synthetic-segments", type=int, default=DEFAULT_SEGMENTS)
     parser.add_argument("--synthetic-seed", type=int, default=7)
     parser.add_argument("--write-synthetic-input", type=Path, help="also save the synthetic Contract A used")
     parser.add_argument("--test-years", type=int, nargs="+", help="default: latest three with enough history")
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--include-ambiguous", action="store_true", help="keep ambiguous histories in the primary panel")
     parser.add_argument("--no-sensitivity", action="store_true", help="skip the ambiguity sensitivity rerun")
+    parser.add_argument("--bootstrap", type=int, default=BOOTSTRAP_RESAMPLES, help="bootstrap resamples; 0 skips")
+    parser.add_argument("--no-stress", action="store_true", help="skip the missing/noisy-input stress tests")
     parser.add_argument("--predictions-out", type=Path, default=Path("artifacts/fold_predictions.parquet"))
     parser.add_argument("--metrics-out", type=Path, default=Path("artifacts/metrics.json"))
     return parser.parse_args(argv)
@@ -78,6 +80,35 @@ def print_summary(metrics: dict) -> None:
             + _fmt(entry.get("pr_auc_mean"))
         )
 
+    label = budget_label(PRIMARY_BUDGET)
+    uncertainty = metrics.get("uncertainty", {})
+    if "capture" in uncertainty:
+        level = round(uncertainty["confidence_level"] * 100)
+        print(f"\n{level}% bootstrap interval, capture@{primary} (mean across test years):")
+        for method, block in uncertainty["capture"][label].items():
+            print(f"  {method:<14}{_interval(block['ci_mean'])}")
+        diff = uncertainty["difference_vs_oldest"][label].get("champion")
+        if diff:
+            print(
+                f"  champion - oldest: {_interval(diff['ci_mean'])}; "
+                f"above zero in {diff['share_of_resamples_above_zero']:.1%} of resamples"
+            )
+
+    robustness = metrics.get("robustness", {})
+    if "scenarios" in robustness:
+        print(f"\nStress tests (champion): change in capture@{primary}, rank correlation, LOW share of affected rows")
+        for name, scenario in robustness["scenarios"].items():
+            champ = scenario["methods"]["champion"]
+            low = scenario["affected_rows_confidence"].get("LOW")
+            print(
+                f"  {name:<20}{_fmt(champ.get(f'capture_at_{primary}_change'))}"
+                f"{_fmt(champ.get('spearman_rank_corr'))}{_fmt(low)}"
+            )
+
+
+def _interval(bounds) -> str:
+    return "n/a" if not bounds else f"[{bounds[0]:.3f}, {bounds[1]:.3f}]"
+
 
 def main(argv=None) -> int:
     args = parse_args(argv)
@@ -96,13 +127,19 @@ def main(argv=None) -> int:
             print(f"ERROR (Contract A): {error}", file=sys.stderr)
         return 2
 
-    result = run_evaluation(
-        pipe_year,
-        test_years=args.test_years,
-        seed=args.seed,
-        exclude_ambiguous=not args.include_ambiguous,
-        run_sensitivity=not args.no_sensitivity,
-    )
+    try:
+        result = run_evaluation(
+            pipe_year,
+            test_years=args.test_years,
+            seed=args.seed,
+            exclude_ambiguous=not args.include_ambiguous,
+            run_sensitivity=not args.no_sensitivity,
+            n_bootstrap=args.bootstrap,
+            run_stress=not args.no_stress,
+        )
+    except ValueError as exc:  # e.g. an incomplete or unknown test year
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
 
     errors = (
         validate_fold_predictions(result.contract_b)
