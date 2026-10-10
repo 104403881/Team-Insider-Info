@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-10T06:36:56+00:00",
+  "generated_at": "2026-10-10T07:02:28+00:00",
   "data_snapshot": "SYNTHETIC-FIXTURE",
   "is_synthetic": true,
   "selection_unit": "network_length_fraction",
@@ -946,6 +946,1102 @@
         "prior_breaks": 0.349423,
         "random": 0.079003,
         "champion": 0.421666
+      }
+    }
+  },
+  "uncertainty": {
+    "method": "paired segment bootstrap within each test year; pooled replicates average the yearly replicates",
+    "n_resamples": 1000,
+    "confidence_level": 0.95,
+    "seed": 2026,
+    "capture": {
+      "budget_0.01": {
+        "logistic": {
+          "ci_mean": [
+            0.0,
+            0.063174
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.096794
+            ],
+            "2022": [
+              0.0,
+              0.081137
+            ],
+            "2023": [
+              0.0,
+              0.075
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.017518,
+            0.098742
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.147059
+            ],
+            "2022": [
+              0.0,
+              0.135188
+            ],
+            "2023": [
+              0.0,
+              0.111111
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.009947,
+            0.077145
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.1
+            ],
+            "2022": [
+              0.0,
+              0.127673
+            ],
+            "2023": [
+              0.0,
+              0.090909
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.0,
+            0.069338
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.135205
+            ],
+            "2022": [
+              0.0,
+              0.085122
+            ],
+            "2023": [
+              0.0,
+              0.073171
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            0.0,
+            0.019052
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.0
+            ],
+            "2022": [
+              0.0,
+              0.057157
+            ],
+            "2023": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.0,
+            0.063174
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.096794
+            ],
+            "2022": [
+              0.0,
+              0.081137
+            ],
+            "2023": [
+              0.0,
+              0.075
+            ]
+          }
+        }
+      },
+      "budget_0.02": {
+        "logistic": {
+          "ci_mean": [
+            0.033039,
+            0.118799
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.189298
+            ],
+            "2022": [
+              0.0,
+              0.131579
+            ],
+            "2023": [
+              0.0,
+              0.147132
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.064876,
+            0.163554
+          ],
+          "by_year": {
+            "2021": [
+              0.02381,
+              0.2
+            ],
+            "2022": [
+              0.05125,
+              0.228571
+            ],
+            "2023": [
+              0.021739,
+              0.18199
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.027013,
+            0.110259
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.128205
+            ],
+            "2022": [
+              0.02,
+              0.175
+            ],
+            "2023": [
+              0.0,
+              0.132107
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.032994,
+            0.126964
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.21628
+            ],
+            "2022": [
+              0.0,
+              0.139535
+            ],
+            "2023": [
+              0.0,
+              0.133378
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            0.0,
+            0.04065
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.046512
+            ],
+            "2022": [
+              0.0,
+              0.109141
+            ],
+            "2023": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.033039,
+            0.118799
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.189298
+            ],
+            "2022": [
+              0.0,
+              0.131579
+            ],
+            "2023": [
+              0.0,
+              0.147132
+            ]
+          }
+        }
+      },
+      "budget_0.05": {
+        "logistic": {
+          "ci_mean": [
+            0.145365,
+            0.295962
+          ],
+          "by_year": {
+            "2021": [
+              0.113573,
+              0.375
+            ],
+            "2022": [
+              0.093012,
+              0.34383
+            ],
+            "2023": [
+              0.113636,
+              0.333333
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.116239,
+            0.240715
+          ],
+          "by_year": {
+            "2021": [
+              0.051282,
+              0.261936
+            ],
+            "2022": [
+              0.08502,
+              0.320824
+            ],
+            "2023": [
+              0.076923,
+              0.282051
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.094053,
+            0.218935
+          ],
+          "by_year": {
+            "2021": [
+              0.044397,
+              0.256429
+            ],
+            "2022": [
+              0.076875,
+              0.317073
+            ],
+            "2023": [
+              0.043478,
+              0.229251
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.154069,
+            0.290412
+          ],
+          "by_year": {
+            "2021": [
+              0.151501,
+              0.4
+            ],
+            "2022": [
+              0.081633,
+              0.315822
+            ],
+            "2023": [
+              0.108696,
+              0.325015
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            0.007937,
+            0.080547
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.081675
+            ],
+            "2022": [
+              0.0,
+              0.162178
+            ],
+            "2023": [
+              0.0,
+              0.083333
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.145365,
+            0.295962
+          ],
+          "by_year": {
+            "2021": [
+              0.113573,
+              0.375
+            ],
+            "2022": [
+              0.093012,
+              0.34383
+            ],
+            "2023": [
+              0.113636,
+              0.333333
+            ]
+          }
+        }
+      },
+      "budget_0.10": {
+        "logistic": {
+          "ci_mean": [
+            0.294672,
+            0.470739
+          ],
+          "by_year": {
+            "2021": [
+              0.258041,
+              0.551061
+            ],
+            "2022": [
+              0.265306,
+              0.575069
+            ],
+            "2023": [
+              0.217362,
+              0.477297
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.294172,
+            0.463372
+          ],
+          "by_year": {
+            "2021": [
+              0.184211,
+              0.469418
+            ],
+            "2022": [
+              0.294056,
+              0.621622
+            ],
+            "2023": [
+              0.230769,
+              0.488385
+            ]
+          }
+        },
+        "oldest": {
+          "ci_mean": [
+            0.23896,
+            0.387128
+          ],
+          "by_year": {
+            "2021": [
+              0.119976,
+              0.375
+            ],
+            "2022": [
+              0.281219,
+              0.542857
+            ],
+            "2023": [
+              0.153846,
+              0.394737
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.343611,
+            0.506691
+          ],
+          "by_year": {
+            "2021": [
+              0.311026,
+              0.617682
+            ],
+            "2022": [
+              0.270833,
+              0.577807
+            ],
+            "2023": [
+              0.271178,
+              0.536632
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            0.04531,
+            0.137894
+          ],
+          "by_year": {
+            "2021": [
+              0.0,
+              0.108108
+            ],
+            "2022": [
+              0.038462,
+              0.232665
+            ],
+            "2023": [
+              0.026316,
+              0.20456
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            0.294672,
+            0.470739
+          ],
+          "by_year": {
+            "2021": [
+              0.258041,
+              0.551061
+            ],
+            "2022": [
+              0.265306,
+              0.575069
+            ],
+            "2023": [
+              0.217362,
+              0.477297
+            ]
+          }
+        }
+      }
+    },
+    "difference_vs_oldest": {
+      "budget_0.01": {
+        "logistic": {
+          "ci_mean": [
+            -0.056351,
+            0.031457
+          ],
+          "share_of_resamples_above_zero": 0.307,
+          "by_year": {
+            "2021": [
+              -0.081081,
+              0.081137
+            ],
+            "2022": [
+              -0.111111,
+              0.054571
+            ],
+            "2023": [
+              -0.073171,
+              0.058868
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            -0.019597,
+            0.054568
+          ],
+          "share_of_resamples_above_zero": 0.787,
+          "by_year": {
+            "2021": [
+              0.0,
+              0.105263
+            ],
+            "2022": [
+              -0.06,
+              0.081081
+            ],
+            "2023": [
+              -0.071429,
+              0.079001
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            -0.056736,
+            0.038771
+          ],
+          "share_of_resamples_above_zero": 0.357,
+          "by_year": {
+            "2021": [
+              -0.078947,
+              0.116313
+            ],
+            "2022": [
+              -0.113636,
+              0.055556
+            ],
+            "2023": [
+              -0.075,
+              0.057143
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            -0.077145,
+            -0.007235
+          ],
+          "share_of_resamples_above_zero": 0.009,
+          "by_year": {
+            "2021": [
+              -0.1,
+              0.0
+            ],
+            "2022": [
+              -0.12766,
+              0.024405
+            ],
+            "2023": [
+              -0.090909,
+              0.0
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            -0.056351,
+            0.031457
+          ],
+          "share_of_resamples_above_zero": 0.307,
+          "by_year": {
+            "2021": [
+              -0.081081,
+              0.081137
+            ],
+            "2022": [
+              -0.111111,
+              0.054571
+            ],
+            "2023": [
+              -0.073171,
+              0.058868
+            ]
+          }
+        }
+      },
+      "budget_0.02": {
+        "logistic": {
+          "ci_mean": [
+            -0.053237,
+            0.067876
+          ],
+          "share_of_resamples_above_zero": 0.601,
+          "by_year": {
+            "2021": [
+              -0.074097,
+              0.147086
+            ],
+            "2022": [
+              -0.136386,
+              0.073216
+            ],
+            "2023": [
+              -0.083378,
+              0.104222
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            0.013889,
+            0.088032
+          ],
+          "share_of_resamples_above_zero": 0.997,
+          "by_year": {
+            "2021": [
+              0.0,
+              0.135135
+            ],
+            "2022": [
+              -0.000373,
+              0.114286
+            ],
+            "2023": [
+              0.0,
+              0.107167
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            -0.050427,
+            0.076122
+          ],
+          "share_of_resamples_above_zero": 0.696,
+          "by_year": {
+            "2021": [
+              -0.065254,
+              0.181878
+            ],
+            "2022": [
+              -0.136364,
+              0.083333
+            ],
+            "2023": [
+              -0.085745,
+              0.090962
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            -0.100804,
+            -0.007752
+          ],
+          "share_of_resamples_above_zero": 0.013,
+          "by_year": {
+            "2021": [
+              -0.127673,
+              0.017901
+            ],
+            "2022": [
+              -0.152174,
+              0.027778
+            ],
+            "2023": [
+              -0.132107,
+              0.0
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            -0.053237,
+            0.067876
+          ],
+          "share_of_resamples_above_zero": 0.601,
+          "by_year": {
+            "2021": [
+              -0.074097,
+              0.147086
+            ],
+            "2022": [
+              -0.136386,
+              0.073216
+            ],
+            "2023": [
+              -0.083378,
+              0.104222
+            ]
+          }
+        }
+      },
+      "budget_0.05": {
+        "logistic": {
+          "ci_mean": [
+            -0.018545,
+            0.149774
+          ],
+          "share_of_resamples_above_zero": 0.939,
+          "by_year": {
+            "2021": [
+              -0.056659,
+              0.257166
+            ],
+            "2022": [
+              -0.142857,
+              0.186125
+            ],
+            "2023": [
+              -0.033393,
+              0.205128
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            -0.027606,
+            0.066069
+          ],
+          "share_of_resamples_above_zero": 0.825,
+          "by_year": {
+            "2021": [
+              -0.073216,
+              0.095238
+            ],
+            "2022": [
+              -0.097573,
+              0.104222
+            ],
+            "2023": [
+              0.0,
+              0.121951
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            -0.017355,
+            0.142985
+          ],
+          "share_of_resamples_above_zero": 0.945,
+          "by_year": {
+            "2021": [
+              -0.020856,
+              0.28125
+            ],
+            "2022": [
+              -0.143009,
+              0.147106
+            ],
+            "2023": [
+              -0.048811,
+              0.205968
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            -0.185247,
+            -0.045454
+          ],
+          "share_of_resamples_above_zero": 0.0,
+          "by_year": {
+            "2021": [
+              -0.236873,
+              0.0
+            ],
+            "2022": [
+              -0.260022,
+              0.0
+            ],
+            "2023": [
+              -0.210582,
+              0.0
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            -0.018545,
+            0.149774
+          ],
+          "share_of_resamples_above_zero": 0.939,
+          "by_year": {
+            "2021": [
+              -0.056659,
+              0.257166
+            ],
+            "2022": [
+              -0.142857,
+              0.186125
+            ],
+            "2023": [
+              -0.033393,
+              0.205128
+            ]
+          }
+        }
+      },
+      "budget_0.10": {
+        "logistic": {
+          "ci_mean": [
+            -0.021001,
+            0.156943
+          ],
+          "share_of_resamples_above_zero": 0.946,
+          "by_year": {
+            "2021": [
+              0.0,
+              0.305556
+            ],
+            "2022": [
+              -0.176503,
+              0.169821
+            ],
+            "2023": [
+              -0.054092,
+              0.190502
+            ]
+          }
+        },
+        "lookup": {
+          "ci_mean": [
+            -0.005865,
+            0.139256
+          ],
+          "share_of_resamples_above_zero": 0.966,
+          "by_year": {
+            "2021": [
+              -0.045455,
+              0.190553
+            ],
+            "2022": [
+              -0.12,
+              0.179545
+            ],
+            "2023": [
+              -0.02274,
+              0.190553
+            ]
+          }
+        },
+        "prior_breaks": {
+          "ci_mean": [
+            0.02319,
+            0.199721
+          ],
+          "share_of_resamples_above_zero": 0.995,
+          "by_year": {
+            "2021": [
+              0.048751,
+              0.390356
+            ],
+            "2022": [
+              -0.177879,
+              0.166755
+            ],
+            "2023": [
+              -0.000446,
+              0.268316
+            ]
+          }
+        },
+        "random": {
+          "ci_mean": [
+            -0.303113,
+            -0.14127
+          ],
+          "share_of_resamples_above_zero": 0.0,
+          "by_year": {
+            "2021": [
+              -0.357177,
+              -0.0625
+            ],
+            "2022": [
+              -0.428641,
+              -0.148103
+            ],
+            "2023": [
+              -0.312558,
+              0.0
+            ]
+          }
+        },
+        "champion": {
+          "ci_mean": [
+            -0.021001,
+            0.156943
+          ],
+          "share_of_resamples_above_zero": 0.946,
+          "by_year": {
+            "2021": [
+              0.0,
+              0.305556
+            ],
+            "2022": [
+              -0.176503,
+              0.169821
+            ],
+            "2023": [
+              -0.054092,
+              0.190502
+            ]
+          }
+        }
+      }
+    }
+  },
+  "robustness": {
+    "budget": 0.05,
+    "note": "models are fitted on clean training years; only test-year inputs are corrupted; evaluation uses true lengths and outcomes",
+    "scenarios": {
+      "mask_05": {
+        "description": "Hide 5% of material, diameter, install-year and nearby-break values",
+        "affected_rows": 330,
+        "affected_rows_confidence": {
+          "HIGH": 0.1455,
+          "MEDIUM": 0.2697,
+          "LOW": 0.5848
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.232407,
+            "capture_at_05_change": -0.000758,
+            "spearman_rank_corr": 0.984376,
+            "selection_overlap_at_05": 0.809232
+          },
+          "lookup": {
+            "capture_at_05": 0.16229,
+            "capture_at_05_change": -0.007576,
+            "spearman_rank_corr": 0.973907,
+            "selection_overlap_at_05": 0.760813
+          },
+          "oldest": {
+            "capture_at_05": 0.147475,
+            "capture_at_05_change": -0.007576,
+            "spearman_rank_corr": 0.881094,
+            "selection_overlap_at_05": 0.885571
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.211532,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "champion": {
+            "capture_at_05": 0.232407,
+            "capture_at_05_change": -0.000758,
+            "spearman_rank_corr": 0.984376,
+            "selection_overlap_at_05": 0.809232
+          }
+        }
+      },
+      "mask_10": {
+        "description": "Hide 10% of material, diameter, install-year and nearby-break values",
+        "affected_rows": 627,
+        "affected_rows_confidence": {
+          "HIGH": 0.1627,
+          "MEDIUM": 0.2743,
+          "LOW": 0.563
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.254798,
+            "capture_at_05_change": 0.021633,
+            "spearman_rank_corr": 0.97062,
+            "selection_overlap_at_05": 0.657354
+          },
+          "lookup": {
+            "capture_at_05": 0.145623,
+            "capture_at_05_change": -0.024242,
+            "spearman_rank_corr": 0.959798,
+            "selection_overlap_at_05": 0.628385
+          },
+          "oldest": {
+            "capture_at_05": 0.14596,
+            "capture_at_05_change": -0.009091,
+            "spearman_rank_corr": 0.795527,
+            "selection_overlap_at_05": 0.790227
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.211532,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "champion": {
+            "capture_at_05": 0.254798,
+            "capture_at_05_change": 0.021633,
+            "spearman_rank_corr": 0.97062,
+            "selection_overlap_at_05": 0.657354
+          }
+        }
+      },
+      "unseen_material_05": {
+        "description": "Replace 5% of materials with a value never seen in training",
+        "affected_rows": 91,
+        "affected_rows_confidence": {
+          "HIGH": 0.0,
+          "MEDIUM": 0.0,
+          "LOW": 1.0
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.240741,
+            "capture_at_05_change": 0.007576,
+            "spearman_rank_corr": 0.991139,
+            "selection_overlap_at_05": 0.939951
+          },
+          "lookup": {
+            "capture_at_05": 0.169865,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 0.985995,
+            "selection_overlap_at_05": 0.939594
+          },
+          "oldest": {
+            "capture_at_05": 0.155051,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.211532,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "champion": {
+            "capture_at_05": 0.240741,
+            "capture_at_05_change": 0.007576,
+            "spearman_rank_corr": 0.991139,
+            "selection_overlap_at_05": 0.939951
+          }
+        }
+      },
+      "perturb_numeric": {
+        "description": "Shift install years by up to 2 years and lengths by up to 5%",
+        "affected_rows": 1788,
+        "affected_rows_confidence": {
+          "HIGH": 0.6695,
+          "MEDIUM": 0.2411,
+          "LOW": 0.0895
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.225589,
+            "capture_at_05_change": -0.007576,
+            "spearman_rank_corr": 0.995632,
+            "selection_overlap_at_05": 0.923611
+          },
+          "lookup": {
+            "capture_at_05": 0.177441,
+            "capture_at_05_change": 0.007576,
+            "spearman_rank_corr": 0.983791,
+            "selection_overlap_at_05": 0.876941
+          },
+          "oldest": {
+            "capture_at_05": 0.170202,
+            "capture_at_05_change": 0.015152,
+            "spearman_rank_corr": 0.998699,
+            "selection_overlap_at_05": 0.864358
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.211532,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "champion": {
+            "capture_at_05": 0.225589,
+            "capture_at_05_change": -0.007576,
+            "spearman_rank_corr": 0.995632,
+            "selection_overlap_at_05": 0.923611
+          }
+        }
       }
     }
   },

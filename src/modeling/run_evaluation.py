@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .config import PRIMARY_BUDGET, SEED, budget_key
+from .config import BOOTSTRAP_RESAMPLES, PRIMARY_BUDGET, SEED, budget_key, budget_label
 from .contracts import (
     metrics_consistency_errors,
     validate_fold_predictions,
@@ -44,6 +44,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--include-ambiguous", action="store_true", help="keep ambiguous histories in the primary panel")
     parser.add_argument("--no-sensitivity", action="store_true", help="skip the ambiguity sensitivity rerun")
+    parser.add_argument("--bootstrap", type=int, default=BOOTSTRAP_RESAMPLES, help="bootstrap resamples; 0 skips")
+    parser.add_argument("--no-stress", action="store_true", help="skip the missing/noisy-input stress tests")
     parser.add_argument("--predictions-out", type=Path, default=Path("artifacts/fold_predictions.parquet"))
     parser.add_argument("--metrics-out", type=Path, default=Path("artifacts/metrics.json"))
     return parser.parse_args(argv)
@@ -78,6 +80,35 @@ def print_summary(metrics: dict) -> None:
             + _fmt(entry.get("pr_auc_mean"))
         )
 
+    label = budget_label(PRIMARY_BUDGET)
+    uncertainty = metrics.get("uncertainty", {})
+    if "capture" in uncertainty:
+        level = round(uncertainty["confidence_level"] * 100)
+        print(f"\n{level}% bootstrap interval, capture@{primary} (mean across test years):")
+        for method, block in uncertainty["capture"][label].items():
+            print(f"  {method:<14}{_interval(block['ci_mean'])}")
+        diff = uncertainty["difference_vs_oldest"][label].get("champion")
+        if diff:
+            print(
+                f"  champion - oldest: {_interval(diff['ci_mean'])}; "
+                f"above zero in {diff['share_of_resamples_above_zero']:.1%} of resamples"
+            )
+
+    robustness = metrics.get("robustness", {})
+    if "scenarios" in robustness:
+        print(f"\nStress tests (champion): change in capture@{primary}, rank correlation, LOW share of affected rows")
+        for name, scenario in robustness["scenarios"].items():
+            champ = scenario["methods"]["champion"]
+            low = scenario["affected_rows_confidence"].get("LOW")
+            print(
+                f"  {name:<20}{_fmt(champ.get(f'capture_at_{primary}_change'))}"
+                f"{_fmt(champ.get('spearman_rank_corr'))}{_fmt(low)}"
+            )
+
+
+def _interval(bounds) -> str:
+    return "n/a" if not bounds else f"[{bounds[0]:.3f}, {bounds[1]:.3f}]"
+
 
 def main(argv=None) -> int:
     args = parse_args(argv)
@@ -103,6 +134,8 @@ def main(argv=None) -> int:
             seed=args.seed,
             exclude_ambiguous=not args.include_ambiguous,
             run_sensitivity=not args.no_sensitivity,
+            n_bootstrap=args.bootstrap,
+            run_stress=not args.no_stress,
         )
     except ValueError as exc:  # e.g. an incomplete or unknown test year
         print(f"ERROR: {exc}", file=sys.stderr)

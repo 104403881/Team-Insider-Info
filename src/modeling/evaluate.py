@@ -20,6 +20,7 @@ from .budget import evaluate_budget
 from .confidence import assess_confidence
 from .config import (
     BASELINE_METHODS,
+    BOOTSTRAP_RESAMPLES,
     BUDGETS,
     CANDIDATE_METHODS,
     CHAMPION_SELECTION_RULE,
@@ -37,6 +38,10 @@ from .config import (
 from .features import numeric
 from .methods import RANKERS, Ranker
 from .splits import default_test_years, last_complete_year, split_frame, walk_forward_folds
+from .stress import run_stress_tests
+from .summaries import mean_or_none as _mean
+from .summaries import round_or_none as _r
+from .uncertainty import bootstrap_uncertainty
 
 CONTRACT_B_COLUMNS = [
     "segment_id",
@@ -154,18 +159,6 @@ def _assert_equal_budgets(table: pd.DataFrame) -> None:
     distinct = table.groupby(["test_year", "budget"])["budget_length_m"].nunique()
     if (distinct > 1).any():
         raise AssertionError(f"unequal length budgets across methods:\n{distinct[distinct > 1]}")
-
-
-def _r(value, digits: int = 6):
-    if value is None:
-        return None
-    value = float(value)
-    return None if math.isnan(value) else round(value, digits)
-
-
-def _mean(values) -> float | None:
-    s = pd.to_numeric(pd.Series(values), errors="coerce").dropna()
-    return float(s.mean()) if len(s) else None
 
 
 def summarize_methods(table: pd.DataFrame, budgets=BUDGETS) -> dict:
@@ -303,6 +296,8 @@ def run_evaluation(
     budgets=BUDGETS,
     exclude_ambiguous: bool = True,
     run_sensitivity: bool = True,
+    n_bootstrap: int = BOOTSTRAP_RESAMPLES,
+    run_stress: bool = True,
     is_synthetic: bool | None = None,
     min_train_years: int = MIN_TRAIN_YEARS,
     rankers: dict[str, type[Ranker]] | None = None,
@@ -330,6 +325,20 @@ def run_evaluation(
     champion = select_champion(methods)
     methods["champion"] = dict(methods[champion])
 
+    uncertainty = {"note": "not run"}
+    if n_bootstrap > 0:
+        uncertainty = bootstrap_uncertainty(
+            predictions, champion, budgets=budgets, n_resamples=n_bootstrap, seed=seed
+        )
+    robustness = {"note": "not run"}
+    candidates = [m for m in CANDIDATE_METHODS if m in (rankers or RANKERS)]
+    if run_stress and candidates:
+        robustness = run_stress_tests(
+            panel, test_years, seed=seed, methods=candidates, min_train_years=min_train_years, rankers=rankers
+        )
+        for scenario in robustness["scenarios"].values():
+            scenario["methods"]["champion"] = dict(scenario["methods"][champion])
+
     metrics = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -350,6 +359,8 @@ def run_evaluation(
         },
         "methods": methods,
         "by_year": build_by_year(table, champion, budgets),
+        "uncertainty": uncertainty,
+        "robustness": robustness,
         "sensitivity": (
             _ambiguity_sensitivity(
                 pipe_year, exclude_ambiguous, complete_through, test_years, seed, budgets, min_train_years, rankers

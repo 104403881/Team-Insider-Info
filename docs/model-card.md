@@ -85,6 +85,17 @@ Member 3's policy routes `LOW`/OOD rows to inspection, never to automatic renewa
 
 Capture counts segments with at least one break, not individual break events. An observed non-event is not proof that inspecting the segment was useless.
 
+**Uncertainty (`metrics.json -> uncertainty`).** This is a paired segment bootstrap: within each test year, segments are resampled with replacement (1,000 resamples) and every method is judged on the same resample.
+
+| Field | Meaning |
+|---|---|
+| `capture.budget_X.<method>.ci_mean` | 95% interval for the across-year mean capture |
+| `capture.budget_X.<method>.by_year` | 95% interval for each test year |
+| `difference_vs_oldest.budget_X.<method>.ci_mean` | 95% interval for (method - oldest) capture |
+| `share_of_resamples_above_zero` | how often the method beat oldest-first across resamples. This is a stability measure, not a p-value. |
+
+The interval covers segment-sampling noise within the observed years. It does not cover year-to-year change, the random baseline's single draw, or differences between Kitchener and Malaysia.
+
 ## 9. Results
 
 Read them from `artifacts/metrics.json`. The Contract B fixture in `contracts/fixtures/` is **synthetic** (`is_synthetic: true`): its numbers are schema examples and must never appear on slides.
@@ -99,9 +110,16 @@ Read them from `artifacts/metrics.json`. The Contract B fixture in `contracts/fi
 ## 10. Robustness (status)
 
 - [x] Ambiguous-history sensitivity (`metrics.json -> sensitivity`)
-- [ ] Mask 5% and 10% of non-critical feature values; measure capture change and rank stability
-- [ ] Unseen material mapped to `UNKNOWN` handled gracefully (unit-tested; stress run pending)
-- [ ] Bootstrap interval within each year
+- [x] Bootstrap intervals within and across test years (`metrics.json -> uncertainty`)
+- [x] Stress tests (`metrics.json -> robustness`). Models are fitted on clean training years; only test-year inputs are corrupted, and evaluation uses true lengths and outcomes.
+
+  | Scenario | Corruption |
+  |---|---|
+  | `mask_05`, `mask_10` | hide 5% / 10% of material, diameter, install year and nearby-break values |
+  | `unseen_material_05` | replace 5% of materials with a value never seen in training |
+  | `perturb_numeric` | install year off by up to 2 years; length off by up to 5% |
+
+  Each method reports `capture_at_05` and its change from clean, Spearman rank correlation with the clean scores, and overlap of the 5%-budget selection. `affected_rows_confidence` shows whether corrupted rows were downgraded (LOW/MEDIUM) instead of being trusted.
 - [ ] Spatial/corridor holdout, if the data supports it; otherwise list it as a limitation
 
 ## 11. Limitations
