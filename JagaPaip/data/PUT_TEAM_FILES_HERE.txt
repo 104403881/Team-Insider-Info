@@ -1,0 +1,15 @@
+Team files currently loaded from Member 1 (Kitchener open-data demonstrator):
+- pipe_year.parquet
+- features.parquet
+- outcomes.parquet
+- breaks_clean.parquet
+- pipes_clean.parquet
+- manifest.json
+
+Optional later:
+- fold_predictions.parquet or fold_predictions.csv
+- metrics.json
+- ranked_worklists.parquet or ranked_worklists.csv
+
+If pipe_year is removed, the app falls back to a labelled synthetic demo.
+City of Kitchener data does not establish effectiveness for Malaysian utilities.
