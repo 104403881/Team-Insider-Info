@@ -14,24 +14,27 @@ City of Kitchener data, if the team connects it later, is a method demonstrator 
 
 ## Where team files go
 
-Copy artifacts into the `data` folder, then restart the app:
+Inside the team repository the app finds the handoffs by itself; nothing needs copying:
 
-| File | Role |
-| --- | --- |
-| `pipe_year.parquet` or `pipe_year.csv` | Pipe attributes and, when present, breaks by year |
-| `fold_predictions.parquet` or `fold_predictions.csv` | Risk scores. Not required. |
-| `metrics.json` | Reported evaluation metrics. Shown as written. Not recomputed. |
-| `ranked_worklists.parquet` or `ranked_worklists.csv` | A supplied list for review. Not mixed into the live budget. |
+| File | Where it is read from | Role |
+| --- | --- | --- |
+| `pipe_year.parquet`, `features.parquet`, `breaks_clean.parquet` ... | `data/data/` (Member 1) | Pipe attributes, point-in-time features, dated breaks |
+| `manifest.json` | `data/` (Member 1) | Snapshot date and source provenance |
+| `fold_predictions.parquet` | `artifacts/` (Member 2, Contract B) | The measured champion's out-of-sample risk percentiles, plus the baselines |
+| `metrics.json` | `artifacts/` (Member 2) | Every Proof Mode number. Shown as written, never recomputed |
+| `ranked_worklists.parquet` | `artifacts/` (Member 3, Contract C) | Recommended actions for the worklist |
 
-Length is read as metres from `length_m` or `length`. If a cost column is present, the worklist can also allocate by those supplied cost units. Costs are not invented and are not converted to a currency.
+A file dropped into this app's `data` folder takes precedence, which is handy for testing. Keep that folder empty for the demo.
 
-The live budget walks the ranked list and includes a segment only when its length (or supplied cost) still fits. A segment that does not fit is skipped. Proof Mode uses the same length rule for a JagaPaip ranking and an oldest-first ranking, and it hides later breaks until **Reveal actual outcomes**.
+**Contract mode.** When Contract B and `metrics.json` are present, the worklist ranks by the champion's `risk_percentile` (ties by pipe ID), recommended actions come from Contract C (shown as *Awaiting decision engine* until it exists), and Proof Mode shows the measured walk-forward comparison: both plans come from Contract B, every count and rate is copied from `metrics.json`, and a mismatch is flagged *do not present*. Without those files the app falls back to the screening heuristic and labels it.
+
+Every budget walks the ranked list and **stops at the first segment that does not fit**, the team's frozen rule, so app plans, `metrics.json` and the decision engine agree.
 
 ## Pages and evaluation metrics
 
 - **Overview** includes a five-step guided demo for judges.
 - **Risk Worklist** filters by pipe ID, band, action, plan status, material, zone, and age; sorts for display only; explains each rank; and exports the current view or the funded plan as CSV.
-- **Proof Mode** builds both plans from facts at the chosen year, then reads outcomes only after **Reveal Actual Outcomes**. It reports:
+- **Proof Mode** (heuristic fallback, without Contract B) builds both plans from facts at the chosen year, then reads outcomes only after **Reveal Actual Outcomes**. It reports:
   - **Capture rate** = window breaks on selected segments ÷ all window breaks on the eligible population.
   - **Capture@5%** = capture rate with a budget of 5% of eligible network length.
   - **Ratio** = JagaPaip ÷ oldest-first capture at the same budget.
@@ -47,7 +50,7 @@ Open the Cursor terminal (Terminal → New Terminal). It should start in this fo
 Create the environment and install packages:
 
 ```powershell
-cd C:\Users\USER\Downloads\JagaPaip
+cd <path to the repository>\JagaPaip
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
@@ -94,5 +97,5 @@ Then open http://localhost:8502 instead.
 ## If a command fails
 
 - `python` is not recognized: install Python 3.12 from [python.org](https://www.python.org/downloads/windows/) and tick **Add python.exe to PATH**. Close and reopen Cursor.
-- Package install fails: check that you are in `C:\Users\USER\Downloads\JagaPaip` and run the `pip install` command again.
+- Package install fails: check that you are in the repository's `JagaPaip` folder and run the `pip install` command again.
 - The page does not load: confirm the terminal still shows Streamlit running, then try http://127.0.0.1:8501 in Chrome.

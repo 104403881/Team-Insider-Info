@@ -13,6 +13,7 @@ import plotly.graph_objects as go
 from jagapaip.schema import (
     ACTION_INSPECT,
     ACTION_MONITOR,
+    ACTION_PENDING,
     ACTION_RENEWAL,
     BAND_HIGH,
     BAND_LOW,
@@ -41,6 +42,7 @@ ACTION_COLORS = {
     ACTION_RENEWAL: RED,
     ACTION_INSPECT: AMBER,
     ACTION_MONITOR: TEAL_DEEP,
+    ACTION_PENDING: MUTED,
 }
 
 
@@ -123,8 +125,10 @@ def band_chart(plan: pd.DataFrame) -> go.Figure:
 
 
 def action_chart(plan: pd.DataFrame) -> go.Figure:
-    order = [ACTION_RENEWAL, ACTION_INSPECT, ACTION_MONITOR]
     selected = plan.loc[plan["selected"]]
+    order = [ACTION_RENEWAL, ACTION_INSPECT, ACTION_MONITOR]
+    if (selected["recommended_action"] == ACTION_PENDING).any():
+        order.append(ACTION_PENDING)
     counts = selected["recommended_action"].value_counts().reindex(order).fillna(0).astype(int)
     fig = go.Figure(
         go.Bar(

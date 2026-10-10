@@ -21,14 +21,20 @@ def _selected(plan: pd.DataFrame) -> list[str]:
     return plan.loc[plan["selected"], "pipe_id"].tolist()
 
 
-def test_budget_skips_a_segment_that_does_not_fit_and_takes_a_shorter_one():
+def test_budget_stops_at_the_first_overflow_instead_of_skipping_ahead():
+    # Order A (500 m), B (80 m), C (50 m), D (40 m). With 625 m, A and B fit (580 m);
+    # C overflows, so the list stops even though D would still fit in the 45 m left.
+    plan = build_worklist(_features(), budget_m=625)
+    assert _selected(plan) == ["A", "B"]
+    assert plan.loc[plan["pipe_id"] == "C", "selection_reason"].iloc[0] == "Not selected - longer than the remaining length budget"
+    assert plan.loc[plan["pipe_id"] == "D", "selection_reason"].iloc[0] == "Not selected - the list stopped at an earlier segment that did not fit"
+    assert plan.loc[plan["selected"], "length_m"].sum() <= 625
+
+
+def test_a_first_segment_longer_than_the_budget_selects_nothing():
     plan = build_worklist(_features(), budget_m=120)
-    # A is first but too long. B uses 80 m. C is 50 m and does not fit in the
-    # remaining 40 m, so it is skipped and the shorter D is funded.
-    assert _selected(plan) == ["B", "D"]
-    reason = plan.loc[plan["pipe_id"] == "A", "selection_reason"].iloc[0]
-    assert reason == "Not selected - longer than the remaining length budget"
-    assert plan.loc[plan["selected"], "length_m"].sum() <= 120
+    assert _selected(plan) == []
+    assert plan.loc[plan["pipe_id"] == "A", "selection_reason"].iloc[0] == "Not selected - longer than the remaining length budget"
 
 
 def test_zero_budget_selects_nothing():
@@ -43,11 +49,11 @@ def test_negative_budget_is_rejected():
 
 
 def test_larger_budget_funds_more_length():
-    small = build_worklist(_features(), budget_m=80)
-    large = build_worklist(_features(), budget_m=180)
-    assert plan_summary(small, 80)["selected_m"] < plan_summary(large, 180)["selected_m"]
-    assert _selected(small) == ["B"]
-    assert _selected(large) == ["B", "C", "D"]
+    small = build_worklist(_features(), budget_m=500)
+    large = build_worklist(_features(), budget_m=580)
+    assert plan_summary(small, 500)["selected_m"] < plan_summary(large, 580)["selected_m"]
+    assert _selected(small) == ["A"]
+    assert _selected(large) == ["A", "B"]
 
 
 def test_selected_length_never_exceeds_budget():

@@ -15,6 +15,7 @@ from jagapaip.ranking import plan_summary
 from jagapaip.schema import (
     ACTION_INSPECT,
     ACTION_MONITOR,
+    ACTION_PENDING,
     ACTION_RENEWAL,
     BAND_HIGH,
     BAND_LOW,
@@ -41,10 +42,10 @@ PAGE_SLUGS = {
 }
 
 BAND_TONE = {BAND_HIGH: "high", BAND_MODERATE: "moderate", BAND_LOW: "low"}
-ACTION_TONE = {ACTION_RENEWAL: "high", ACTION_INSPECT: "moderate", ACTION_MONITOR: "teal"}
-ACTION_DOT = {ACTION_RENEWAL: "red", ACTION_INSPECT: "amber", ACTION_MONITOR: "teal"}
+ACTION_TONE = {ACTION_RENEWAL: "high", ACTION_INSPECT: "moderate", ACTION_MONITOR: "teal", ACTION_PENDING: "slate"}
+ACTION_DOT = {ACTION_RENEWAL: "red", ACTION_INSPECT: "amber", ACTION_MONITOR: "teal", ACTION_PENDING: "slate"}
 BAND_TEXT_COLOUR = {BAND_HIGH: "#B91C1C", BAND_MODERATE: "#B45309", BAND_LOW: "#047857"}
-ACTION_TEXT_COLOUR = {ACTION_RENEWAL: "#B91C1C", ACTION_INSPECT: "#B45309", ACTION_MONITOR: "#0F766E"}
+ACTION_TEXT_COLOUR = {ACTION_RENEWAL: "#B91C1C", ACTION_INSPECT: "#B45309", ACTION_MONITOR: "#0F766E", ACTION_PENDING: "#475569"}
 SCORE_BAR_COLOUR = {BAND_HIGH: "#DC2626", BAND_MODERATE: "#F59E0B", BAND_LOW: "#10B981"}
 
 
@@ -97,6 +98,8 @@ def score_source_label(plan: pd.DataFrame) -> str:
     if plan.empty or "score_source" not in plan.columns:
         return "Unavailable"
     sources = set(plan["score_source"].dropna().unique())
+    if sources == {"contract_champion"}:
+        return "Measured champion (Contract B)"
     if sources == {"supplied_prediction"}:
         return "Supplied predictions"
     if "supplied_prediction" in sources:
@@ -390,7 +393,7 @@ def render_sidebar(meta: dict, network_m: float):
             max_value=ceiling,
             step=0.1,
             key="budget_km",
-            help="The plan is rebuilt in rank order. A segment is added only when its length still fits. No currency value is invented.",
+            help="The plan is rebuilt in rank order and stops at the first segment that does not fit. No currency value is invented.",
         )
         summary_slot = st.empty()
         st.divider()
@@ -438,7 +441,12 @@ def page_overview(dataset: dict, plan: pd.DataFrame, summary: dict) -> None:
             "KITCHENER OPEN DATA — METHOD DEMONSTRATOR",
             [
                 "These pipes and breaks come from City of Kitchener open data prepared by Member 1. They are not Malaysian utility records.",
-                "No trained model or metrics.json was in the handoff. Scores are a screening heuristic. This does not establish effectiveness for any utility.",
+                (
+                    "Scores are the measured champion from fold_predictions (Contract B); Proof Mode numbers come from metrics.json. "
+                    "This does not establish effectiveness for Malaysian utilities."
+                    if meta.get("contract_mode")
+                    else "No trained model or metrics.json was in the handoff. Scores are a screening heuristic. This does not establish effectiveness for any utility."
+                ),
             ],
             warn=True,
         )
@@ -459,7 +467,11 @@ def page_overview(dataset: dict, plan: pd.DataFrame, summary: dict) -> None:
             {
                 "label": "Pipe segments",
                 "value": f"{summary['candidates']:,}" if summary["candidates"] else None,
-                "note": f"{summary['high_risk_segments']:,} high-risk (score {RENEWAL_THRESHOLD:.2f} or above).",
+                "note": (
+                    f"{summary['high_risk_segments']:,} in the top 5% of the champion ranking."
+                    if meta.get("contract_mode")
+                    else f"{summary['high_risk_segments']:,} high-risk (score {RENEWAL_THRESHOLD:.2f} or above)."
+                ),
                 "dot": "red" if summary["high_risk_segments"] else "slate",
             },
             {
@@ -468,6 +480,7 @@ def page_overview(dataset: dict, plan: pd.DataFrame, summary: dict) -> None:
                 "note": (
                     f"{actions.get(ACTION_RENEWAL, 0)} renewal review · {actions.get(ACTION_INSPECT, 0)} inspect · "
                     f"{actions.get(ACTION_MONITOR, 0)} monitor"
+                    + (f" · {actions[ACTION_PENDING]} awaiting decision engine" if actions.get(ACTION_PENDING) else "")
                 ),
                 "dot": "teal",
             },
@@ -528,10 +541,10 @@ def page_overview(dataset: dict, plan: pd.DataFrame, summary: dict) -> None:
     with st.expander("Method and data limitations"):
         st.markdown(
             """
-            1. Each in-service segment receives a score from a supplied prediction file, or from the screening heuristic when that file is absent.
-            2. JagaPaip sorts by score, highest first. Ties go to more recorded breaks, then greater age, then pipe ID.
-            3. The budget walks down that list. A segment is funded when its length still fits. A segment that is too long is skipped, and a shorter one later in the list can still be funded.
-            4. Recommended action is a band on the score: Renewal Review at 0.70 or above, Inspect at 0.45 or above, otherwise Monitor.
+            1. Each in-service segment receives a score: the measured champion's risk percentile from Contract B when it is loaded, otherwise the screening heuristic.
+            2. JagaPaip sorts by score, highest first. With Contract B, ties go to pipe ID (the team contract); with the heuristic, to more recorded breaks, then greater age, then pipe ID.
+            3. The budget walks down that list and stops at the first segment that does not fit, the same rule as metrics.json and the decision engine.
+            4. Recommended action comes from the decision engine (Contract C) when Contract B is loaded; otherwise it is a band on the heuristic score: Renewal Review at 0.70 or above, Inspect at 0.45 or above, otherwise Monitor.
             """
         )
         for line in limitation_lines(meta):
@@ -593,7 +606,8 @@ def render_budget_summary(summary: dict, utilisation: float | None) -> None:
         ]
     )
     rows = []
-    for action in (ACTION_RENEWAL, ACTION_INSPECT, ACTION_MONITOR):
+    shown = [ACTION_RENEWAL, ACTION_INSPECT, ACTION_MONITOR] + ([ACTION_PENDING] if summary["actions"].get(ACTION_PENDING) else [])
+    for action in shown:
         count = summary["actions"].get(action, 0)
         rows.append(
             f"<div class='jp-action-row'><span class='name'><span class='dot {ACTION_DOT[action]}'></span>{esc(action)}</span>"

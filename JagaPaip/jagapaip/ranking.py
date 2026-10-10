@@ -14,6 +14,7 @@ import pandas as pd
 from jagapaip.schema import (
     ACTION_INSPECT,
     ACTION_MONITOR,
+    ACTION_PENDING,
     ACTION_RENEWAL,
     AGE_CAP_YEARS,
     AGE_WEIGHT,
@@ -22,6 +23,8 @@ from jagapaip.schema import (
     BAND_MODERATE,
     BREAK_CAP,
     BREAK_WEIGHT,
+    CONTRACT_BAND_HIGH_PERCENTILE,
+    CONTRACT_BAND_MODERATE_PERCENTILE,
     FORBIDDEN_FIELDS,
     INSPECT_THRESHOLD,
     MATERIAL_CODE_MAP,
@@ -33,6 +36,9 @@ from jagapaip.schema import (
 
 SCORE_SOURCE_HEURISTIC = "screening_heuristic"
 SCORE_SOURCE_SUPPLIED = "supplied_prediction"
+# The measured champion's risk_percentile from Contract B (fold_predictions.parquet).
+SCORE_SOURCE_CONTRACT = "contract_champion"
+CONTRACT_ORIGIN = "contract_b"
 
 
 class RankingError(ValueError):
@@ -64,6 +70,15 @@ def band_for_score(score: float) -> str:
     if score >= RENEWAL_THRESHOLD:
         return BAND_HIGH
     if score >= INSPECT_THRESHOLD:
+        return BAND_MODERATE
+    return BAND_LOW
+
+
+def band_for_percentile(percentile: float) -> str:
+    """Display band for a Contract B risk_percentile: top 5%, next 15%, rest."""
+    if percentile >= CONTRACT_BAND_HIGH_PERCENTILE:
+        return BAND_HIGH
+    if percentile >= CONTRACT_BAND_MODERATE_PERCENTILE:
         return BAND_MODERATE
     return BAND_LOW
 
@@ -138,6 +153,24 @@ def _explanation_supplied(row: pd.Series) -> str:
     )
 
 
+def _explanation_contract(row: pd.Series) -> str:
+    year = int(row["decision_year"]) if "decision_year" in row and pd.notna(row["decision_year"]) else None
+    year_text = f" for {year}" if year is not None else ""
+    if row["recommended_action"] == ACTION_PENDING:
+        action_text = (
+            "No action is shown yet: actions come from the decision engine (Contract C, ranked_worklists), "
+            "not from score thresholds."
+        )
+    else:
+        action_text = f"{row['recommended_action']} comes from the decision engine (Contract C)."
+    return (
+        f"Ranked at the {100 * row['predicted_risk']:.1f}th percentile{year_text} by the team's measured champion "
+        "(Contract B, scored out of time using only earlier years). JagaPaip did not recompute it. "
+        "The ranking describes observed risk patterns and is not a finding that any factor caused a break. "
+        f"{action_text}"
+    )
+
+
 def score_segments(features: pd.DataFrame) -> pd.DataFrame:
     """Add a risk score, band, action, and plain-language explanation.
 
@@ -175,7 +208,9 @@ def score_segments(features: pd.DataFrame) -> pd.DataFrame:
                 "material_component": math.nan,
                 "break_component": math.nan,
                 "material_used": item.get("material", "Unknown"),
-                "score_source": SCORE_SOURCE_SUPPLIED,
+                "score_source": (
+                    SCORE_SOURCE_CONTRACT if item.get("score_origin") == CONTRACT_ORIGIN else SCORE_SOURCE_SUPPLIED
+                ),
             }
         else:
             components = heuristic_components(
@@ -196,8 +231,21 @@ def score_segments(features: pd.DataFrame) -> pd.DataFrame:
 
     scored["risk_band"] = scored["predicted_risk"].map(band_for_score)
     scored["recommended_action"] = scored["predicted_risk"].map(action_for_score)
+    contract = scored["score_source"] == SCORE_SOURCE_CONTRACT
+    if contract.any():
+        scored.loc[contract, "risk_band"] = scored.loc[contract, "predicted_risk"].map(band_for_percentile)
+        supplied_action = (
+            scored["contract_action"] if "contract_action" in scored.columns else pd.Series(pd.NA, index=scored.index)
+        )
+        scored.loc[contract, "recommended_action"] = supplied_action[contract].where(
+            supplied_action[contract].notna(), ACTION_PENDING
+        )
+    explain = {
+        SCORE_SOURCE_CONTRACT: _explanation_contract,
+        SCORE_SOURCE_SUPPLIED: _explanation_supplied,
+    }
     scored["explanation"] = scored.apply(
-        lambda row: _explanation_supplied(row) if row["score_source"] == SCORE_SOURCE_SUPPLIED else _explanation_heuristic(row),
+        lambda row: explain.get(row["score_source"], _explanation_heuristic)(row),
         axis=1,
     )
     return scored
@@ -211,6 +259,12 @@ def _order(scored: pd.DataFrame, strategy: str) -> pd.DataFrame:
         frame["age_years"] = 0
     if "install_year" not in frame.columns:
         frame["install_year"] = pd.NA
+    contract_scored = "score_source" in frame.columns and bool(len(frame)) and (
+        frame["score_source"] == SCORE_SOURCE_CONTRACT
+    ).all()
+    if strategy == STRATEGY_JAGAPAIP and contract_scored:
+        # Contract B ordering: risk_percentile descending, then segment_id ascending.
+        return frame.sort_values(by=["predicted_risk", "pipe_id"], ascending=[False, True], kind="mergesort")
     if strategy == STRATEGY_JAGAPAIP:
         return frame.sort_values(
             by=["predicted_risk", "historical_breaks", "age_years", "pipe_id"],
@@ -232,11 +286,14 @@ def apply_length_budget(
     budget_m: float,
     size_column: str = "length_m",
 ) -> pd.DataFrame:
-    """Select segments in the given order until the budget is spent.
+    """Select the longest prefix of the given order that fits the budget.
 
-    A segment larger than the remainder is skipped, so a later smaller segment
-    can still be selected. The default size is length in metres. A supplied
-    cost column can be used instead. Costs are never invented.
+    Selection stops at the first segment that does not fit; later, smaller
+    segments are not used to fill the gap. This is the team's frozen
+    Contract B/C rule, so app plans match metrics.json and the decision
+    engine. Segments with a missing length are passed over without stopping.
+    The default size is length in metres. A supplied cost column can be used
+    instead. Costs are never invented.
     """
     if budget_m < 0:
         raise RankingError("budget_m must be zero or greater.")
@@ -255,7 +312,9 @@ def apply_length_budget(
         fitted_text = "Selected within the remaining cost budget"
         used_text = "Not selected - cost budget already used"
         overflow_text = "Not selected - larger than the remaining cost budget"
+    stopped_text = "Not selected - the list stopped at an earlier segment that did not fit"
 
+    stopped = False
     remaining = float(budget_m)
     selected: list[bool] = []
     reasons: list[str] = []
@@ -277,18 +336,19 @@ def apply_length_budget(
             continue
         length_value = float(length)
         size_value = length_value if size_column == "length_m" else float(size)
-        if size_value <= remaining + 1e-9:
+        if stopped:
+            selected.append(False)
+            reasons.append(stopped_text)
+        elif size_value <= remaining + 1e-9:
             selected.append(True)
             reasons.append(fitted_text)
             spent_length += length_value
             spent_budget += size_value
             remaining -= size_value
-        elif remaining <= 1e-6:
-            selected.append(False)
-            reasons.append(used_text)
         else:
             selected.append(False)
-            reasons.append(overflow_text)
+            reasons.append(used_text if remaining <= 1e-6 else overflow_text)
+            stopped = True
         cumulative_length.append(spent_length)
         cumulative_budget.append(spent_budget)
 

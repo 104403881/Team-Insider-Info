@@ -26,20 +26,23 @@ def selected_ids(plan: pd.DataFrame) -> list[str]:
     return plan.loc[plan["selected"], "pipe_id"].astype(str).tolist()
 
 
-def test_budget_skips_a_segment_that_does_not_fit() -> None:
-    plan = build_worklist(network(), budget_m=150)
-    assert selected_ids(plan) == ["A", "C"]
-    assert plan.loc[plan["pipe_id"] == "D", "selection_reason"].iloc[0].endswith(
+def test_budget_stops_at_the_first_segment_that_does_not_fit() -> None:
+    # Order D (1000 m), A (100 m), B (100 m), C (50 m). With 1150 m, D and A fit;
+    # B overflows, so the list stops there even though C would fit in the 50 m left.
+    plan = build_worklist(network(), budget_m=1150)
+    assert selected_ids(plan) == ["D", "A"]
+    assert plan.loc[plan["pipe_id"] == "B", "selection_reason"].iloc[0].endswith(
         "longer than the remaining length budget"
     )
-    assert float(plan.loc[plan["selected"], "length_m"].sum()) <= 150
+    assert plan.loc[plan["pipe_id"] == "C", "selection_reason"].iloc[0] == "Not selected - the list stopped at an earlier segment that did not fit"
+    assert float(plan.loc[plan["selected"], "length_m"].sum()) <= 1150
 
 
 def test_changing_the_budget_changes_the_selected_pipes() -> None:
-    tight = selected_ids(build_worklist(network(), budget_m=100))
-    wider = selected_ids(build_worklist(network(), budget_m=200))
-    assert tight == ["A"]
-    assert wider == ["A", "B"]
+    tight = selected_ids(build_worklist(network(), budget_m=1000))
+    wider = selected_ids(build_worklist(network(), budget_m=1100))
+    assert tight == ["D"]
+    assert wider == ["D", "A"]
     assert tight != wider
 
 

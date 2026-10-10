@@ -10,6 +10,9 @@ import pandas as pd
 from jagapaip.demo_data import build_demo_tables
 from jagapaip.schema import (
     BREAKS_CLEAN_FILE,
+    CONTRACT_B_COLUMNS,
+    CONTRACT_CHAMPION,
+    CONTRACT_OLDEST,
     DEMO_DECISION_YEAR,
     FEATURES_FILE,
     MANIFEST_FILE,
@@ -36,6 +39,10 @@ TEAM_FILES = (
 )
 
 ROOT = Path(__file__).resolve().parent.parent
+# The team repository that contains this app: Member 1's package lives in
+# data/ (tables in data/data/) and Member 2/3 handoffs in artifacts/.
+REPO = ROOT.parent
+REPO_FOLDERS = (REPO / "data" / "data", REPO / "data", REPO / "artifacts")
 
 
 class DataSchemaError(ValueError):
@@ -43,13 +50,21 @@ class DataSchemaError(ValueError):
 
 
 def locate(root: Path, filename: str) -> Path | None:
-    """Find a team artifact by name, including a csv twin and common folders."""
+    """Find a team artifact by name, including a csv twin and common folders.
+
+    Files dropped into this app's own folders win. When running from the app
+    folder inside the team repository, the repository's data/ and artifacts/
+    are searched next, so the app always reads the current handoffs instead
+    of stale copies.
+    """
     names = [filename]
     suffix = Path(filename).suffix.lower()
     stem = Path(filename).stem
     if suffix == ".parquet":
         names.append(f"{stem}.csv")
-    folders = (root / "data", root, root / "artifacts", root / "outputs")
+    folders = [root / "data", root, root / "artifacts", root / "outputs"]
+    if Path(root).resolve() == ROOT:
+        folders.extend(REPO_FOLDERS)
     for folder in folders:
         for name in names:
             candidate = folder / name
@@ -292,6 +307,65 @@ def interpret_predictions(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]
     return averaged, warnings
 
 
+def is_contract_b(frame: pd.DataFrame) -> bool:
+    """True for the team's long-format fold_predictions (Contract B 1.0)."""
+    return set(CONTRACT_B_COLUMNS) <= set(frame.columns)
+
+
+def interpret_contract_b(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
+    """Return (validated Contract B, champion scores for the app, warnings).
+
+    Contract B has one row per segment, test year and method. The champion's
+    rows become the JagaPaip scores; methods are never averaged together.
+    risk_percentile (0-1, higher is riskier) is used as the score so the
+    app's ordering equals Contract B's.
+    """
+    warnings: list[str] = []
+    table = frame.copy()
+    table["segment_id"] = table["segment_id"].astype(str)
+    table["test_year"] = pd.to_numeric(table["test_year"], errors="coerce").astype("Int64")
+    methods = set(table["method"].astype(str))
+    missing = {CONTRACT_CHAMPION, CONTRACT_OLDEST} - methods
+    if missing:
+        raise DataSchemaError(f"fold_predictions (Contract B) has no rows for method(s): {sorted(missing)}.")
+    if table.duplicated(["segment_id", "test_year", "method"]).any():
+        raise DataSchemaError("fold_predictions (Contract B) has duplicate segment_id × test_year × method rows.")
+    champion = table.loc[table["method"] == CONTRACT_CHAMPION]
+    predictions = pd.DataFrame(
+        {
+            "pipe_id": champion["segment_id"].to_numpy(),
+            "year": champion["test_year"].astype(float).to_numpy(),
+            "predicted_risk": pd.to_numeric(champion["risk_percentile"], errors="coerce").to_numpy(),
+            "score_origin": "contract_b",
+        }
+    )
+    for column in ("confidence_label", "is_ood"):
+        if column in champion.columns:
+            predictions[column] = champion[column].to_numpy()
+    return table, predictions, warnings
+
+
+def attach_contract_actions(predictions: pd.DataFrame, worklists: pd.DataFrame | None) -> tuple[pd.DataFrame, str | None]:
+    """Copy Contract C's recommended_action onto the champion scores, when available."""
+    if worklists is None or not {"segment_id", "test_year", "recommended_action"} <= set(worklists.columns):
+        return predictions, None
+    rows = worklists.copy()
+    if "method" in rows.columns:
+        rows = rows.loc[rows["method"].astype(str) == CONTRACT_CHAMPION]
+    if "ranking_mode" in rows.columns:
+        rows = rows.loc[rows["ranking_mode"].astype(str) == "VALIDATED_RISK"]
+    rows = pd.DataFrame(
+        {
+            "pipe_id": rows["segment_id"].astype(str).to_numpy(),
+            "year": pd.to_numeric(rows["test_year"], errors="coerce").astype(float).to_numpy(),
+            "contract_action": rows["recommended_action"].to_numpy(),
+        }
+    ).drop_duplicates(["pipe_id", "year"])
+    merged = predictions.merge(rows, on=["pipe_id", "year"], how="left")
+    covered = merged["contract_action"].notna().mean() if len(merged) else 0.0
+    return merged, f"Recommended actions come from ranked_worklists (Contract C) for {covered:.0%} of champion rows."
+
+
 def load_dataset(root: Path | None = None) -> dict:
     """Return pipes, optional ledgers, and a meta block describing the source."""
     root = Path(root) if root is not None else ROOT
@@ -355,14 +429,19 @@ def load_dataset(root: Path | None = None) -> dict:
             manifest = None
 
     predictions = None
+    contract_b = None
     if found["fold_predictions"] is not None:
         try:
             raw_predictions = read_table(found["fold_predictions"])
-            predictions, prediction_warnings = interpret_predictions(raw_predictions)
+            if is_contract_b(raw_predictions):
+                contract_b, predictions, prediction_warnings = interpret_contract_b(raw_predictions)
+            else:
+                predictions, prediction_warnings = interpret_predictions(raw_predictions)
             warnings.extend(prediction_warnings)
         except Exception as exc:
             warnings.append(f"{PREDICTIONS_FILE} was found but could not be used ({exc}).")
             predictions = None
+            contract_b = None
 
     metrics = None
     if found["metrics"] is not None:
@@ -379,6 +458,11 @@ def load_dataset(root: Path | None = None) -> dict:
         except Exception as exc:
             warnings.append(f"{WORKLIST_FILE} was found but could not be read ({exc}).")
             worklists = None
+
+    if contract_b is not None:
+        predictions, action_note = attach_contract_actions(predictions, worklists)
+        if action_note:
+            warnings.append(action_note)
 
     if pipes is not None and pipes.empty:
         warnings.append("The pipe file produced no segments with a positive length. Demo data is shown instead.")
@@ -424,25 +508,43 @@ def load_dataset(root: Path | None = None) -> dict:
             else "Figures below come from the file in this project. They are only as complete as that file."
         )
         length_note = "Length is projected metres from the team inventory (length_m)."
-        if predictions is not None:
+        if contract_b is not None:
+            score_note = (
+                "Risk scores are the measured champion's risk_percentile from Contract B (fold_predictions), "
+                "scored out of time. Segments without a champion score are not ranked."
+            )
+        elif predictions is not None:
             score_note = "Risk scores come from fold_predictions where a value exists for the decision year. Missing scores use the screening heuristic."
         else:
             score_note = (
                 "No fold_predictions file was in the handoff. Risk scores are the screening heuristic, "
                 "not Member 2 model scores and not a validated probability."
             )
-        warnings.append(
-            "Member 1 handoff: no trained model and no metrics.json. Ranking uses age, material, and prior breaks only. "
-            "target_next_year_break and target_break_count are held out of ranking."
-        )
+        if predictions is None and metrics is None:
+            warnings.append(
+                "Member 1 handoff: no trained model and no metrics.json. Ranking uses age, material, and prior breaks only. "
+                "target_next_year_break and target_break_count are held out of ranking."
+            )
+        if contract_b is not None and pipes is not None:
+            latest = contract_b.loc[contract_b["test_year"] == contract_b["test_year"].max(), "segment_id"]
+            known = latest.isin(set(pipes["pipe_id"].astype(str))).mean() if len(latest) else 0.0
+            if known < 0.9:
+                warnings.append(
+                    f"Only {known:.0%} of Contract B segment IDs match the loaded pipes. "
+                    "Check that fold_predictions and pipe_year come from the same data snapshot."
+                )
 
     if mode == "demo" and metrics is not None:
         warnings.append("metrics.json is loaded, but it does not describe the synthetic network on the other pages.")
     if mode == "demo" and worklists is not None:
         warnings.append("ranked_worklists.parquet is loaded. The live plan is still calculated from the synthetic network.")
 
+    contract_mode = mode == "artifacts" and contract_b is not None and metrics is not None
     meta = {
         "mode": mode,
+        "contract_mode": contract_mode,
+        "champion_method": (metrics or {}).get("champion_method") if contract_mode else None,
+        "metrics_synthetic": bool((metrics or {}).get("is_synthetic")),
         "status_title": status_title,
         "status_detail": status_detail,
         "warnings": warnings,
@@ -460,6 +562,7 @@ def load_dataset(root: Path | None = None) -> dict:
         "breaks": breaks,
         "panel": panel,
         "predictions": predictions,
+        "contract_b": contract_b,
         "metrics": metrics,
         "worklists": worklists,
         "meta": meta,

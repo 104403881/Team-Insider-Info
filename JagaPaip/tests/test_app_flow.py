@@ -5,8 +5,15 @@ from pathlib import Path
 import pytest
 from streamlit.testing.v1 import AppTest
 
+from jagapaip.loader import ROOT, load_dataset
+
 APP = str(Path(__file__).resolve().parent.parent / "app.py")
 PAGES = ["Overview", "Risk Worklist", "Pipe Evidence", "Proof Mode", "Evaluation & Data Quality"]
+
+_DATASET = load_dataset(ROOT)
+CONTRACT_MODE = bool(_DATASET["meta"]["contract_mode"])
+contract_only = pytest.mark.skipif(not CONTRACT_MODE, reason="needs Contract B and metrics.json")
+heuristic_only = pytest.mark.skipif(CONTRACT_MODE, reason="heuristic Proof Mode runs only without Contract B")
 
 
 def start(page=None):
@@ -43,6 +50,7 @@ def test_budget_slider_rebuilds_the_overview_plan():
     assert "No budget set" in text(at)
 
 
+@heuristic_only
 def test_reveal_does_not_change_either_plan():
     at = start("Proof Mode")
     page = text(at)
@@ -83,6 +91,7 @@ def test_worklist_filters_and_sort_run():
     assert "No segments match these filters" in text(at)
 
 
+@heuristic_only
 def test_proof_selection_toggle_and_evaluation_honesty():
     at = start("Proof Mode")
     assert "Plan composition" in text(at)
@@ -97,4 +106,45 @@ def test_proof_selection_toggle_and_evaluation_honesty():
     assert not at.exception
     page = text(at)
     assert "No genuine measured results are loaded" in page
+    assert "What field validation would still require" in page
+
+
+@contract_only
+def test_contract_proof_reveal_shows_metrics_json_numbers_and_keeps_plans():
+    at = start("Proof Mode")
+    assert "Outcomes are hidden" in text(at)
+    plans_before = [df.value.copy() for df in at.dataframe[:2]]
+    assert plans_before and all("actual_break" not in df.columns for df in plans_before)
+    at.button(key="proof_reveal_btn").click().run()
+    assert not at.exception
+    page = text(at)
+    assert "Plans unchanged by the reveal · lists reproduce metrics.json" in page
+    assert "do not present" not in page
+    metrics = _DATASET["metrics"]
+    year = max(metrics["test_years"])
+    by_year = metrics["by_year"][str(year)]
+    total = by_year["summary"]["total_breaks"]
+    for method in ("champion", "oldest"):
+        captured = by_year["budget_0.05"][method]["breaks_captured"]
+        assert f"{captured} of {total} broken pipes" in " ".join(m.value for m in at.markdown)
+    for before, after in zip(plans_before, at.dataframe[:2]):
+        assert before["Pipe ID"].tolist() == after.value["Pipe ID"].tolist()
+    at.select_slider(key="cproof_budget").set_value(0.02).run()
+    assert "Outcomes are hidden" in text(at)
+
+
+@contract_only
+def test_contract_proof_toggle_and_evaluation_honesty():
+    at = start("Proof Mode")
+    assert "copied from metrics.json" in text(at)
+    at.button(key="proof_hide_sel").click().run()
+    assert not at.exception
+    assert "Selections are hidden" in text(at)
+    at.button(key="proof_show_sel").click().run()
+    assert at.dataframe[0].value["Pipe ID"].tolist()
+    at.sidebar.radio(key="page").set_value("Evaluation & Data Quality").run()
+    assert not at.exception
+    page = text(at)
+    assert "Values copied from metrics.json." in page
+    assert "simulation is turned off" in page
     assert "What field validation would still require" in page

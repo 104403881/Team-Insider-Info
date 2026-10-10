@@ -108,7 +108,13 @@ def attach_predictions(
     predictions: pd.DataFrame | None,
     decision_year: int,
 ) -> pd.DataFrame:
-    """Add supplied scores for this decision year, when a prediction file exists."""
+    """Add supplied scores for this decision year, when a prediction file exists.
+
+    Contract B champion scores (``score_origin`` column) are joined one-to-one
+    and only scored segments are kept, so the eligible set equals Contract B's
+    for that year. Other prediction files keep the original left join, with
+    the screening heuristic filling gaps.
+    """
     frame = features.copy()
     if predictions is None or predictions.empty or "predicted_risk" not in predictions.columns:
         return frame
@@ -120,6 +126,10 @@ def attach_predictions(
         use = use.drop(columns=[column for column in use.columns if column == "year"])
     if use.empty:
         return frame
+    if "score_origin" in use.columns:
+        extra = [c for c in ("predicted_risk", "score_origin", "confidence_label", "is_ood", "contract_action") if c in use.columns]
+        scores = use.drop_duplicates("pipe_id")[["pipe_id", *extra]]
+        return frame.drop(columns=[c for c in extra if c in frame.columns]).merge(scores, on="pipe_id", how="inner")
     scores = use.groupby("pipe_id", as_index=False)["predicted_risk"].mean()
     return frame.merge(scores, on="pipe_id", how="left")
 

@@ -11,6 +11,15 @@ import streamlit as st
 
 from jagapaip import charts
 from jagapaip.backtest import CAPTURE_FRACTION, run_backtest
+from jagapaip.contract_proof import (
+    across_years,
+    contract_budgets,
+    contract_plans,
+    contract_years,
+    metrics_cell,
+    plan_mismatches,
+    year_interval,
+)
 from jagapaip.proof import (
     available_evaluation_years,
     build_plan,
@@ -26,6 +35,8 @@ from jagapaip.schema import (
     BAND_HIGH,
     BAND_LOW,
     BAND_MODERATE,
+    CONTRACT_CHAMPION,
+    CONTRACT_OLDEST,
     PROOF_HORIZON_YEARS,
     STRATEGY_JAGAPAIP,
     STRATEGY_OLDEST,
@@ -34,8 +45,8 @@ from jagapaip.views import (
     esc,
     fact_list,
     go_to,
-    kpi_grid,
     km_text,
+    kpi_grid,
     notice,
     page_header,
     panel,
@@ -350,8 +361,219 @@ def pct(value: float | None) -> str | None:
     return None if value is None else f"{100 * value:.1f}"
 
 
+def contract_proof_table(plan: pd.DataFrame, features: pd.DataFrame | None) -> pd.DataFrame:
+    """Selected pipes for one contract plan. Outcomes are deliberately not included."""
+    chosen = plan.loc[plan["selected"], ["rank", "segment_id", "risk_percentile", "length_m"]
+                      + [c for c in ("confidence_label",) if c in plan.columns]].copy()
+    table = pd.DataFrame(
+        {
+            "Rank": chosen["rank"],
+            "Pipe ID": chosen["segment_id"],
+            "Risk percentile": chosen["risk_percentile"],
+            "Confidence": chosen["confidence_label"] if "confidence_label" in chosen else None,
+            "Length (m)": chosen["length_m"],
+        }
+    )
+    if features is not None and not features.empty:
+        facts = features.drop_duplicates("pipe_id").set_index("pipe_id")
+        for column, label in (("material", "Material"), ("age_years", "Age"), ("historical_breaks", "Prior breaks")):
+            if column in facts.columns:
+                table[label] = table["Pipe ID"].map(facts[column])
+    return table
+
+
+def page_proof_contract(dataset: dict) -> None:
+    """Proof Mode on Contract B rankings with every number read from metrics.json."""
+    meta, metrics, contract_b = dataset["meta"], dataset["metrics"], dataset["contract_b"]
+    champion_name = meta.get("champion_method") or "champion"
+    page_header(
+        "Proof Mode",
+        "Pick a past year, fix both plans under the same network-length budget, then reveal what broke that year.",
+        standard_chips(meta),
+    )
+    if meta.get("metrics_synthetic"):
+        notice(
+            "SYNTHETIC METRICS — NOT RESULTS",
+            ["metrics.json is flagged is_synthetic. These numbers are schema examples and must not be presented."],
+            warn=True,
+        )
+    notice(
+        "What this test uses",
+        [
+            f"JagaPaip plan: the measured champion ({champion_name}) from fold_predictions. Each year was scored using only earlier years.",
+            "Baseline: oldest-first from the same file, with the same eligible pipes and the same length budget.",
+            "Every count and rate below is copied from metrics.json (the team's walk-forward evaluation). The app does not compute them.",
+            "City of Kitchener open data — a method demonstrator. It does not establish effectiveness for Malaysian utilities.",
+        ],
+    )
+
+    years = contract_years(metrics)
+    budgets = contract_budgets(metrics)
+    if not years or not budgets:
+        notice("metrics.json has no test years or budgets", ["Proof Mode cannot run until metrics.json lists them."], warn=True)
+        return
+    with panel("proof_setup"):
+        step_title(1, "Choose the test year and budget", "Only years and budgets evaluated in metrics.json are offered.")
+        controls = st.columns([1, 1.3, 1.4], gap="medium")
+        with controls[0]:
+            if st.session_state.get("cproof_year") not in years:
+                st.session_state.cproof_year = max(years)
+            year = int(st.selectbox("Test year", years, key="cproof_year",
+                                    help="Rankings use only information available before 1 January of this year."))
+        with controls[1]:
+            if st.session_state.get("cproof_budget") not in budgets:
+                st.session_state.cproof_budget = 0.05 if 0.05 in budgets else budgets[0]
+            budget = float(st.select_slider("Length budget (share of network)", options=budgets, key="cproof_budget",
+                                            format_func=lambda b: f"{b:.0%}", help="The same share of network length for both plans."))
+        plans = contract_plans(contract_b, year, budget)
+        champion, oldest = plans[CONTRACT_CHAMPION], plans[CONTRACT_OLDEST]
+        budget_m = float(champion["budget_length_m"].iloc[0]) if len(champion) else 0.0
+        network_m = float(champion["length_m"].sum())
+        with controls[2]:
+            fact_list(
+                [
+                    ("Eligible population", f"{len(champion):,} segments · {km_text(network_m)}"),
+                    ("Budget for both plans", f"{budget:.0%} of network = {km_text(budget_m)}"),
+                    ("Held-back outcome", f"Recorded breaks during {year}"),
+                ]
+            )
+
+    signature = ("contract", year, budget)
+    if st.session_state.get("proof_sig") != signature:
+        st.session_state.proof_sig = signature
+        st.session_state.proof_revealed = False
+
+    features = None
+    panel_frame = dataset.get("panel")
+    if panel_frame is not None and "year" in panel_frame.columns:
+        features = panel_frame.loc[pd.to_numeric(panel_frame["year"], errors="coerce") == year]
+    with panel("proof_plans"):
+        step_title(2, "Compare the two plans", "Both lists are fixed now, before any outcome is read. Outcomes are not in these tables.")
+        if "proof_show_selections" not in st.session_state:
+            st.session_state.proof_show_selections = True
+        show_sel, hide_sel = st.columns([1, 1])
+        with show_sel:
+            st.button("Show selected segments", on_click=show_selections, key="proof_show_sel", disabled=bool(st.session_state.proof_show_selections), width="stretch")
+        with hide_sel:
+            st.button("Hide selected segments", on_click=hide_selections, key="proof_hide_sel", disabled=not bool(st.session_state.proof_show_selections), width="stretch")
+        left, right = st.columns(2, gap="medium")
+        for column, plan, title, dot, sub in (
+            (left, champion, "JagaPaip plan", "teal", f"Measured champion ({champion_name}), highest risk percentile first."),
+            (right, oldest, "Oldest-first baseline", "slate", "Same eligible pipes and budget, oldest pipe first."),
+        ):
+            with column:
+                chosen = plan.loc[plan["selected"]]
+                show_html(
+                    f"<p class='jp-panel-title' style='font-size:0.98rem'><span class='dot {dot}'></span>&nbsp; {esc(title)} "
+                    f"<span class='jp-panel-meta'>· {len(chosen)} segments · {km_text(float(chosen['length_m'].sum()))}</span></p>"
+                )
+                st.caption(sub)
+                if not st.session_state.proof_show_selections:
+                    st.info("Selections are hidden. Click Show selected segments to inspect which pipes each method funded.")
+                elif chosen.empty:
+                    st.info("No segment fits this budget.")
+                else:
+                    st.dataframe(contract_proof_table(plan, features), hide_index=True, height=table_height(len(chosen), 380),
+                                 column_config={"Risk percentile": st.column_config.NumberColumn(format="%.3f")})
+        st.caption(
+            "Both lists stop at the first pipe that would overflow the budget, the rule used by metrics.json and the decision engine."
+        )
+
+    with panel("proof_reveal"):
+        step_title(3, "Reveal actual outcomes", f"Pipes with at least one recorded break during {year}, on the same eligible pipes.")
+        revealed = bool(st.session_state.get("proof_revealed", False))
+        if not revealed:
+            pre = plan_mismatches(plans, metrics, year, budget, revealed=False)
+            if pre:
+                notice("Plans do not match metrics.json — do not present", pre, warn=True)
+            fact_list(
+                [
+                    ("Outcome", f"Recorded breaks during {year}"),
+                    ("Budget for the comparison", f"{budget:.0%} of network = {km_text(budget_m)}"),
+                    ("Numbers source", "metrics.json (copied, not recomputed)"),
+                ]
+            )
+            st.caption("Outcomes are hidden and have not been read for this comparison.")
+            st.button("Reveal Actual Outcomes", type="primary", on_click=reveal_outcomes, key="proof_reveal_btn")
+            return
+
+        ours = metrics_cell(metrics, year, budget, CONTRACT_CHAMPION) or {}
+        base = metrics_cell(metrics, year, budget, CONTRACT_OLDEST) or {}
+        problems = plan_mismatches(plans, metrics, year, budget, revealed=True)
+        if problems:
+            notice("Mismatch with metrics.json — do not present", problems, warn=True)
+        total = metrics.get("by_year", {}).get(str(year), {}).get("summary", {}).get("total_breaks")
+        interval = year_interval(metrics, year, budget)
+        kpi_grid(
+            [
+                {"label": f"JagaPaip capture at {budget:.0%}", "value": pct(ours.get("capture")), "unit": "%", "fallback": "Unavailable",
+                 "note": f"{ours.get('breaks_captured', '—')} of {total if total is not None else '—'} broken pipes, in {ours.get('selected_segments', '—')} selected.", "dot": "teal"},
+                {"label": f"Oldest-first capture at {budget:.0%}", "value": pct(base.get("capture")), "unit": "%", "fallback": "Unavailable",
+                 "note": f"{base.get('breaks_captured', '—')} of {total if total is not None else '—'} broken pipes, in {base.get('selected_segments', '—')} selected.", "dot": "slate"},
+                {"label": "Difference, 95% interval", "value": None if not interval else f"{100 * interval[0]:.0f} to {100 * interval[1]:.0f}",
+                 "unit": "pts", "fallback": "Unavailable", "note": f"JagaPaip minus oldest-first capture in {year} (bootstrap).", "dot": "amber"},
+                {"label": f"Broken pipes in {year}", "value": None if total is None else f"{total:,}",
+                 "note": "Eligible pipes with at least one recorded break.", "dot": "slate"},
+            ]
+        )
+
+        def row(label: str, key: str, fmt) -> dict:
+            return {"Metric": label, "JagaPaip": fmt(ours.get(key)), "Oldest-first": fmt(base.get(key))}
+
+        def num(value):
+            return "—" if value is None else f"{value:,}"
+
+        def rate(value):
+            return "Unavailable" if value is None else f"{100 * value:.1f}%"
+
+        left, right = st.columns([1, 1.2], gap="medium")
+        with left:
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        row("Segments selected", "selected_segments", num),
+                        row("Length selected (km)", "selected_length_m", lambda v: "—" if v is None else f"{v / 1000:.2f}"),
+                        row("Broken pipes in the plan", "breaks_captured", num),
+                        row("Capture (share of all broken pipes)", "capture", rate),
+                        row("Precision (broken ÷ selected)", "precision", rate),
+                        row("Selected without a recorded break", "observed_non_events", num),
+                    ]
+                ),
+                hide_index=True,
+                width="stretch",
+            )
+            st.caption(f"Test year {year}, budget {budget:.0%} of network length. Values copied from metrics.json.")
+        with right:
+            st.markdown(f"**All test years ({', '.join(str(y) for y in years)}), budget {budget:.0%}**")
+            st.dataframe(across_years(metrics, budget), hide_index=True, width="stretch",
+                         column_config={"Capture (mean of test years)": st.column_config.NumberColumn(format="percent")})
+        fact_list(
+            [
+                ("Plan integrity", "Plans unchanged by the reveal · lists reproduce metrics.json" if not problems
+                 else "Mismatch — investigate before presenting"),
+                ("Source", f"{meta['files'].get('metrics') or 'metrics.json'} · generated {metrics.get('generated_at', '—')}"),
+                ("Data snapshot", str(metrics.get("data_snapshot", "—"))),
+            ]
+        )
+        with st.expander("Metric definitions, assumptions, and limitations"):
+            st.markdown(
+                f"""
+                - **Capture** = pipes with at least one recorded break during {year} that are in the plan ÷ all such pipes in the eligible population.
+                - **Same budget**: both plans get {budget:.0%} of the eligible network length and stop at the first pipe that would overflow it.
+                - **A selected pipe without a recorded break** is an observed non-event, not proof that inspecting it was unnecessary.
+                - **This measures targeting quality**, not breaks prevented or money saved.
+                - **Limitations**: see `metrics.json → limitations` and the model card (`docs/model-card.md`). Kitchener open data is a
+                  method demonstrator and does not establish effectiveness for Malaysian utilities.
+                """
+            )
+        st.button("Hide outcomes again", on_click=hide_outcomes, key="proof_hide_btn")
+
+
 def page_proof(dataset: dict) -> None:
     meta = dataset["meta"]
+    if meta.get("contract_mode"):
+        page_proof_contract(dataset)
+        return
     demo = meta["mode"] == "demo"
     page_header(
         "Proof Mode",
@@ -823,8 +1045,13 @@ def page_evaluation(dataset: dict, plan: pd.DataFrame) -> None:
             "Transparent simulated evaluation",
             "Optional. Uses the same hold-out method as Proof Mode. It is not a substitute for metrics.json.",
         )
-        years = available_evaluation_years(dataset, PROOF_HORIZON_YEARS)
-        if not years:
+        years = [] if meta.get("contract_mode") else available_evaluation_years(dataset, PROOF_HORIZON_YEARS)
+        if meta.get("contract_mode"):
+            st.info(
+                "Measured results are loaded (metrics.json and fold_predictions), so the screening-heuristic simulation is "
+                "turned off: it would put unvalidated numbers next to measured ones. Proof Mode shows the measured comparison."
+            )
+        elif not years:
             st.info("No complete outcome window is available, so a simulated evaluation cannot be generated from this file.")
         else:
             sim_year = years[-1]
@@ -864,13 +1091,30 @@ def page_evaluation(dataset: dict, plan: pd.DataFrame) -> None:
     with left:
         with panel("definitions"):
             panel_head("Metric definitions")
+            contract_mode = bool(meta.get("contract_mode"))
+            action_definition = (
+                "From the decision engine (Contract C, ranked_worklists). Shown as Awaiting decision engine until that file is loaded."
+                if contract_mode
+                else "Renewal Review at or above 0.70, Inspect at or above 0.45, otherwise Monitor."
+            )
+            capture_definition = (
+                f"Share of pipes with at least one recorded break during the test year that fall inside a plan using "
+                f"{CAPTURE_FRACTION:.0%} of network length. Copied from metrics.json."
+                if contract_mode
+                else f"Share of outcome-window breaks on segments selected with a budget of {CAPTURE_FRACTION:.0%} of network length."
+            )
+            window_definition = (
+                "Breaks recorded during the test year; rankings use only information from before 1 January of that year."
+                if contract_mode
+                else "Breaks after the evaluation year. Shown only after reveal, and never used to rank."
+            )
             st.markdown(
                 f"""
-                - **Risk score.** The number used to order the JagaPaip queue. With no prediction file, it is a screening heuristic, not a probability.
-                - **Recommended action.** Renewal Review at or above 0.70, Inspect at or above 0.45, otherwise Monitor.
+                - **Risk score.** The number used to order the JagaPaip queue. With Contract B it is the measured champion's within-year risk percentile; with no prediction file, it is a screening heuristic, not a probability.
+                - **Recommended action.** {action_definition}
                 - **Network-length budget.** Kilometres of pipe that may be selected, because monetary cost is absent.
-                - **Capture@{CAPTURE_FRACTION:.0%}.** Share of outcome-window breaks on segments selected with a budget of {CAPTURE_FRACTION:.0%} of network length.
-                - **Outcome window.** Breaks after the evaluation year. Shown only after reveal, and never used to rank.
+                - **Capture@{CAPTURE_FRACTION:.0%}.** {capture_definition}
+                - **Outcome window.** {window_definition}
                 - **Oldest-first.** The same length budget, given to the oldest pipes first.
                 """
             )

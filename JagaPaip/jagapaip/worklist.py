@@ -10,8 +10,8 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
-from jagapaip.ranking import SCORE_SOURCE_SUPPLIED
-from jagapaip.schema import ACTION_INSPECT, ACTION_MONITOR, ACTION_RENEWAL
+from jagapaip.ranking import SCORE_SOURCE_CONTRACT, SCORE_SOURCE_SUPPLIED
+from jagapaip.schema import ACTION_INSPECT, ACTION_MONITOR, ACTION_PENDING, ACTION_RENEWAL
 
 MAX_SEARCH_LENGTH = 64
 
@@ -29,11 +29,13 @@ PRIORITY_BY_ACTION = {
     ACTION_RENEWAL: "P1",
     ACTION_INSPECT: "P2",
     ACTION_MONITOR: "P3",
+    ACTION_PENDING: "P9",
 }
 PRIORITY_LABELS = {
     "P1": "P1 — act first",
     "P2": "P2 — inspect",
     "P3": "P3 — monitor",
+    "P9": "Pending decision engine",
 }
 
 SORT_OPTIONS = {
@@ -124,6 +126,14 @@ def priority_reason(row: pd.Series | dict) -> str:
     score = get("predicted_risk")
     if get("score_source") == SCORE_SOURCE_SUPPLIED:
         return f"Supplied model score {float(score):.3f}"
+    if get("score_source") == SCORE_SOURCE_CONTRACT:
+        facts = [f"champion percentile {float(score):.3f}"]
+        breaks, age = get("historical_breaks"), get("age_years")
+        if pd.notna(breaks):
+            facts.append(f"{int(breaks)} prior {'break' if int(breaks) == 1 else 'breaks'}")
+        if pd.notna(age):
+            facts.append(f"age {int(round(float(age)))} yrs")
+        return "Measured: " + " · ".join(facts)
     parts = []
     age = get("age_years")
     if pd.notna(age) and pd.notna(get("age_component")):

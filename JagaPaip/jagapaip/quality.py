@@ -113,8 +113,12 @@ def provenance(dataset: dict, score_source: str) -> list[dict]:
         },
         {
             "Element": "Risk scores",
-            "Classification": "Model predictions (supplied)" if score_source == "Supplied predictions" else (
-                "Model predictions with screening-heuristic fill" if "heuristic fill" in score_source else "Screening heuristic (not a trained model)"
+            "Classification": (
+                "Measured champion — walk-forward out-of-sample scores (Contract B)"
+                if score_source == "Measured champion (Contract B)"
+                else "Model predictions (supplied)" if score_source == "Supplied predictions" else (
+                    "Model predictions with screening-heuristic fill" if "heuristic fill" in score_source else "Screening heuristic (not a trained model)"
+                )
             ),
             "Source": meta["files"].get("fold_predictions", "") or "jagapaip/ranking.py heuristic",
         },
@@ -126,11 +130,14 @@ def provenance(dataset: dict, score_source: str) -> list[dict]:
         {
             "Element": "Proof Mode comparison",
             "Classification": (
-                "Simulated on synthetic data — not a validation"
+                "Measured result, copied from metrics.json (Contract B rankings)"
+                if meta.get("contract_mode")
+                else "Simulated on synthetic data — not a validation"
                 if demo
                 else ("Computed from loaded ledger — not independently validated" if dataset["breaks"] is not None else "Unavailable")
             ),
-            "Source": "jagapaip/backtest.py",
+            "Source": (meta["files"].get("metrics", "") + " + " + meta["files"].get("fold_predictions", ""))
+            if meta.get("contract_mode") else "jagapaip/backtest.py",
         },
         {
             "Element": "Worklist review marks",

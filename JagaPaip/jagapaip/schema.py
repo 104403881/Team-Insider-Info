@@ -119,6 +119,18 @@ INSPECT_THRESHOLD = 0.45
 ACTION_RENEWAL = "Renewal Review"
 ACTION_INSPECT = "Inspect"
 ACTION_MONITOR = "Monitor"
+# Contract mode: actions come from Member 3's Contract C, never from app thresholds.
+ACTION_PENDING = "Awaiting decision engine"
+
+# Contract mode display bands on the champion's within-year risk_percentile.
+# They colour the table only; they are not actions.
+CONTRACT_BAND_HIGH_PERCENTILE = 0.95  # top 5% of ranked segments
+CONTRACT_BAND_MODERATE_PERCENTILE = 0.80  # next 15%
+
+# Contract B (fold_predictions) columns the app needs, and its method names.
+CONTRACT_B_COLUMNS = ("segment_id", "test_year", "method", "model_score", "risk_percentile", "length_m")
+CONTRACT_CHAMPION = "champion"
+CONTRACT_OLDEST = "oldest"
 
 BAND_HIGH = "High"
 BAND_MODERATE = "Moderate"
