@@ -10,6 +10,7 @@ import pandas as pd
 import streamlit as st
 
 from jagapaip import charts
+from jagapaip.judge_ready import risk_pattern, evidence_coverage
 from jagapaip.proof import build_plan, features_for_year
 from jagapaip.ranking import plan_summary
 from jagapaip.schema import (
@@ -631,11 +632,17 @@ def recorded_history(dataset: dict, pipe_id: str, decision_year: int) -> pd.Data
 
 def page_evidence(dataset: dict, plan: pd.DataFrame) -> None:
     meta = dataset["meta"]
+
+    history_cutoff = int(meta["decision_year"]) - (
+        1 if meta.get("contract_mode") else 0
+    )
+
     page_header(
         "Pipe Evidence",
         "Recorded facts for one segment, kept separate from the score and the recommended action.",
         standard_chips(meta),
     )
+
     if plan.empty:
         st.info("No in-service segments are available for this decision year.")
         return
@@ -668,7 +675,7 @@ def page_evidence(dataset: dict, plan: pd.DataFrame) -> None:
             {"label": "Risk score", "value": f"{row.predicted_risk:.3f}", "note": score_source_label(plan.loc[plan['pipe_id'] == pipe_id]), "dot": {"High": "red", "Moderate": "amber", "Low": "green"}.get(row.risk_band, "slate")},
             {"label": "Planning rank", "value": f"{int(row['rank'])}", "note": f"of {len(plan):,} segments.", "dot": "slate"},
             {"label": "Length", "value": None if missing(row.length_m) else f"{float(row.length_m):,.0f}", "unit": "m", "note": "What this segment costs the length budget.", "dot": "slate"},
-            {"label": "Recorded breaks", "value": None if missing(row.historical_breaks) else f"{int(row.historical_breaks)}", "fallback": "Not in source", "note": f"On or before {meta['decision_year']}.", "dot": "slate"},
+            {"label": "Recorded breaks", "value": None if missing(row.historical_breaks) else f"{int(row.historical_breaks)}", "fallback": "Not in source", "note": f"On or before {history_cutoff}.", "dot": "slate"},
         ]
     )
 
@@ -685,7 +692,7 @@ def page_evidence(dataset: dict, plan: pd.DataFrame) -> None:
                     ("Age at decision year", show_text(row.age_years, 0, " years")),
                     ("Length", show_text(row.length_m, 0, " m")),
                     ("Diameter", show_text(row.diameter_mm, 0, " mm")),
-                    ("Recorded breaks through decision year", show_text(row.historical_breaks, 0)),
+                    (f"Recorded breaks through {history_cutoff}", show_text(row.historical_breaks, 0)),
                     ("Decision year", str(meta["decision_year"])),
                 ]
             )
@@ -699,11 +706,19 @@ def page_evidence(dataset: dict, plan: pd.DataFrame) -> None:
                     ("Risk score", f"{row.predicted_risk:.3f}"),
                     ("Score source", source),
                     ("Risk band", str(row.risk_band)),
+                    ("Recorded risk pattern", risk_pattern(row)),
+                    ("Evidence coverage", evidence_coverage(row)[0]),
                     ("Recommended action", str(row.recommended_action)),
                     ("Budget decision", str(row.selection_reason)),
                 ]
+
             )
             show_html(f"<p class='jp-panel-sub' style='color:#334155'>{esc(row.explanation)}</p>")
+            st.caption(
+                evidence_coverage(row)[1]
+                + " Risk patterns describe recorded evidence, not diagnosed "
+                "physical causes. Evidence completeness is not model confidence."
+            )
 
     chart_left, chart_right = st.columns(2, gap="medium")
     with chart_left:
@@ -717,12 +732,12 @@ def page_evidence(dataset: dict, plan: pd.DataFrame) -> None:
                 st.caption("Points explain the heuristic only. They do not show that a factor caused a break.")
     with chart_right:
         with panel("history"):
-            panel_head("Recorded break history", f"Breaks in the ledger on or before {meta['decision_year']}.")
-            history = recorded_history(dataset, str(pipe_id), int(meta["decision_year"]))
+            panel_head("Recorded break history",f"Breaks in the ledger on or before {history_cutoff}.")
+            history = recorded_history(dataset, str(pipe_id), history_cutoff)
             if history is None:
                 st.info("This source has no year-level break ledger, so individual break years cannot be shown.")
             elif history.empty:
-                st.info(f"No recorded breaks for {pipe_id} on or before {meta['decision_year']}.")
+                st.info(f"No recorded breaks for {pipe_id} on or before {history_cutoff}.")
             else:
                 show_chart(charts.break_history_chart(history))
                 st.caption("These are dates in the loaded ledger. A date is not a cause.")

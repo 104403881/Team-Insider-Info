@@ -2126,8 +2126,133 @@
             "selection_overlap_at_05": 1.0
           }
         }
+      },
+      "missing_prior_breaks_05": {
+        "description": "Hide 5% of segment-level prior-break counts",
+        "affected_rows": 2397,
+        "affected_rows_confidence": {
+          "HIGH": 0.9883,
+          "MEDIUM": 0.0104,
+          "LOW": 0.0013
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.270109,
+            "capture_at_05_change": 0.011836,
+            "spearman_rank_corr": 0.99996,
+            "selection_overlap_at_05": 0.905857
+          },
+          "lookup": {
+            "capture_at_05": 0.277778,
+            "capture_at_05_change": 0.005556,
+            "spearman_rank_corr": 0.999298,
+            "selection_overlap_at_05": 0.911161
+          },
+          "oldest": {
+            "capture_at_05": 0.066486,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.32971,
+            "capture_at_05_change": 0.004831,
+            "spearman_rank_corr": 0.971239,
+            "selection_overlap_at_05": 0.89078
+          },
+          "champion": {
+            "capture_at_05": 0.32971,
+            "capture_at_05_change": 0.004831,
+            "spearman_rank_corr": 0.971239,
+            "selection_overlap_at_05": 0.89078
+          }
+        }
+      },
+      "missing_prior_breaks_10": {
+        "description": "Hide 10% of segment-level prior-break counts",
+        "affected_rows": 4659,
+        "affected_rows_confidence": {
+          "HIGH": 0.9888,
+          "MEDIUM": 0.0103,
+          "LOW": 0.0009
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.286715,
+            "capture_at_05_change": 0.028442,
+            "spearman_rank_corr": 0.999923,
+            "selection_overlap_at_05": 0.814474
+          },
+          "lookup": {
+            "capture_at_05": 0.290942,
+            "capture_at_05_change": 0.01872,
+            "spearman_rank_corr": 0.998772,
+            "selection_overlap_at_05": 0.849856
+          },
+          "oldest": {
+            "capture_at_05": 0.066486,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.32349,
+            "capture_at_05_change": -0.001389,
+            "spearman_rank_corr": 0.949247,
+            "selection_overlap_at_05": 0.831735
+          },
+          "champion": {
+            "capture_at_05": 0.32349,
+            "capture_at_05_change": -0.001389,
+            "spearman_rank_corr": 0.949247,
+            "selection_overlap_at_05": 0.831735
+          }
+        }
+      },
+      "inaccurate_prior_breaks_10": {
+        "description": "Adjust 10% of prior-break counts by +/-1",
+        "affected_rows": 2536,
+        "affected_rows_confidence": {
+          "HIGH": 0.9874,
+          "MEDIUM": 0.0122,
+          "LOW": 0.0004
+        },
+        "methods": {
+          "logistic": {
+            "capture_at_05": 0.259662,
+            "capture_at_05_change": 0.001389,
+            "spearman_rank_corr": 0.998164,
+            "selection_overlap_at_05": 0.934904
+          },
+          "lookup": {
+            "capture_at_05": 0.267391,
+            "capture_at_05_change": -0.004831,
+            "spearman_rank_corr": 0.927128,
+            "selection_overlap_at_05": 0.924386
+          },
+          "oldest": {
+            "capture_at_05": 0.066486,
+            "capture_at_05_change": 0.0,
+            "spearman_rank_corr": 1.0,
+            "selection_overlap_at_05": 1.0
+          },
+          "prior_breaks": {
+            "capture_at_05": 0.320048,
+            "capture_at_05_change": -0.004831,
+            "spearman_rank_corr": 0.735178,
+            "selection_overlap_at_05": 0.925923
+          },
+          "champion": {
+            "capture_at_05": 0.320048,
+            "capture_at_05_change": -0.004831,
+            "spearman_rank_corr": 0.735178,
+            "selection_overlap_at_05": 0.925923
+          }
+        }
       }
-    }
+    },
+    "new_scenarios_source": "artifacts\\stress_check\\metrics.json",
+    "new_scenarios_generated_at": "2026-10-11T01:17:06+00:00"
   },
   "sensitivity": {
     "ambiguous_rows": 2406,

@@ -60,7 +60,51 @@ def _perturb_numeric(test: pd.DataFrame, rng) -> tuple[pd.DataFrame, np.ndarray]
     return out, np.ones(len(out), dtype=bool)
 
 
+def _missing_prior_breaks(
+    test: pd.DataFrame, rate: float, rng
+) -> tuple[pd.DataFrame, np.ndarray]:
+    """Hide prior-break counts for a sample of pipe segments."""
+    out = test.copy()
+    hit = rng.random(len(out)) < rate
+    out.loc[hit, "prior_break_count"] = np.nan
+    return out, hit
+
+
+def _inaccurate_prior_breaks(
+    test: pd.DataFrame, rate: float, rng
+) -> tuple[pd.DataFrame, np.ndarray]:
+    """Introduce one-count errors in recorded break history."""
+    out = test.copy()
+    counts = numeric(out["prior_break_count"])
+    hit = rng.random(len(out)) < rate
+    direction = rng.choice([-1, 1], size=len(out))
+
+    changed = counts.where(
+        ~hit, (counts + direction).clip(lower=0)
+    )
+    out["prior_break_count"] = changed
+
+    affected = (
+        hit
+        & counts.notna().to_numpy()
+        & changed.ne(counts).to_numpy()
+    )
+    return out, affected
+
+
 SCENARIOS = {
+    "missing_prior_breaks_05": (
+        "Hide 5% of segment-level prior-break counts",
+        lambda test, rng: _missing_prior_breaks(test, 0.05, rng),
+    ),
+    "missing_prior_breaks_10": (
+        "Hide 10% of segment-level prior-break counts",
+        lambda test, rng: _missing_prior_breaks(test, 0.10, rng),
+    ),
+    "inaccurate_prior_breaks_10": (
+        "Adjust 10% of prior-break counts by +/-1",
+        lambda test, rng: _inaccurate_prior_breaks(test, 0.10, rng),
+    ),
     "mask_05": (
         "Hide 5% of material, diameter, install-year and nearby-break values",
         lambda test, rng: _mask(test, 0.05, rng),
@@ -78,7 +122,6 @@ SCENARIOS = {
         _perturb_numeric,
     ),
 }
-
 
 def _ranked(truth: pd.DataFrame, scores) -> pd.DataFrame:
     scores = np.asarray(scores, dtype=float)

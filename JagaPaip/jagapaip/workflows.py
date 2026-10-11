@@ -11,6 +11,11 @@ import streamlit as st
 
 from jagapaip import charts
 from jagapaip.backtest import CAPTURE_FRACTION, run_backtest
+from jagapaip.judge_ready import (
+    evaluation_brief,
+    robustness_rows,
+    time_separated_selection,
+)
 from jagapaip.contract_proof import (
     across_years,
     contract_budgets,
@@ -20,6 +25,7 @@ from jagapaip.contract_proof import (
     plan_mismatches,
     year_interval,
 )
+
 from jagapaip.proof import (
     available_evaluation_years,
     build_plan,
@@ -1019,6 +1025,120 @@ def page_evaluation(dataset: dict, plan: pd.DataFrame) -> None:
             st.dataframe(pd.DataFrame(flatten_metrics(metrics)), hide_index=True)
             with st.expander("Original metrics.json"):
                 st.json(metrics)
+
+    # Judging evidence: predictive rigor and robustness
+    with st.expander(
+        "Judging Evidence — Predictive Rigor & Robustness",
+        expanded=True,
+    ):
+        st.subheader("Historical Model Performance")
+
+        if metrics is None or meta["mode"] == "demo":
+            st.warning(
+                "Measured evaluation data is not available "
+                "for the current network."
+            )
+        else:
+            brief = evaluation_brief(metrics)
+
+            if brief is not None:
+                c1, c2, c3, c4 = st.columns(4)
+
+                c1.metric(
+                    "JagaPaip Capture @ 5%",
+                    f"{brief['capture']:.1%}",
+                )
+
+                c2.metric(
+                    "Oldest-First Capture @ 5%",
+                    f"{brief['oldest_capture']:.1%}",
+                )
+
+                c3.metric(
+                    "Precision @ 5%",
+                    f"{brief['precision']:.1%}",
+                )
+
+                c4.metric(
+                    "Selected Without Break",
+                    f"{brief['observed_non_events']:,}",
+                )
+
+                st.caption(
+                    "Results from historical evaluation years. "
+                    "Selected Without Break is the combined count "
+                    "across evaluated years, not a proven false alarm."
+                )
+            else:
+                st.info(
+                    "Required historical performance metrics "
+                    "are missing from metrics.json."
+                )
+
+            st.divider()
+            st.subheader("Time-Separated Validation")
+
+            check = time_separated_selection(metrics)
+
+            if check is not None:
+                st.write(
+                    "Method selected using earlier years:",
+                    check["selected_method"],
+                )
+
+                st.write(
+                    "Selection years:",
+                    check["selection_years"],
+                )
+
+                st.metric(
+                    "Later-Year Capture @ 5%",
+                    f"{check['holdout_capture']:.1%}",
+                )
+
+                st.caption(
+                    "Oldest-first on the same later year: "
+                    f"{check['holdout_oldest_capture']:.1%}"
+                )
+
+                st.warning(
+                    "This is a retrospective sensitivity check, "
+                    "not an independent untouched test. "
+                    "The original champion selection already "
+                    "considered these evaluation years."
+                )
+            else:
+                st.info(
+                    "Insufficient complete yearly metrics "
+                    "for a time-separated comparison."
+                )
+
+            st.divider()
+            st.subheader("Robustness Under Noisy Data")
+
+            robustness = robustness_rows(metrics)
+
+            if not robustness.empty:
+                st.dataframe(
+                    robustness,
+                    hide_index=True,
+                    width="stretch",
+                )   
+                st.caption(
+                    "These are measured historical stress-test results. "
+                    "An unchanged score may mean the tested feature is not "
+                    "used by the selected method. "
+                    "Break-history robustness was evaluated using simulated "
+                    "missing and inaccurate historical break counts. "
+                    "Results show changes in capture and ranking stability "
+                    "under the tested scenarios, not guaranteed reliability "
+                    "under all real-world data conditions."
+                )
+            else:
+                st.info(
+                    "No measured robustness scenarios found "
+                    "in metrics.json."
+                )
 
     worklists = dataset["worklists"]
     if worklists is not None:

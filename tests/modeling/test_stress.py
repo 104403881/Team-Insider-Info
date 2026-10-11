@@ -23,10 +23,18 @@ def test_every_scenario_reports_every_candidate(stress):
             assert overlap is None or 0 <= overlap <= 1
 
 
+
 def test_untouched_inputs_leave_prior_breaks_unchanged(stress):
-    # prior_break_count is never corrupted, so the prior-breaks ranking must not move.
-    for scenario in stress["scenarios"].values():
-        entry = scenario["methods"]["prior_breaks"]
+    original_scenarios = (
+        "mask_05",
+        "mask_10",
+        "unseen_material_05",
+        "perturb_numeric",
+    )
+
+    for name in original_scenarios:
+        entry = stress["scenarios"][name]["methods"]["prior_breaks"]
+
         assert entry[f"capture_at_{KEY}_change"] == 0
         assert entry["spearman_rank_corr"] == pytest.approx(1.0)
         assert entry[f"selection_overlap_at_{KEY}"] == pytest.approx(1.0)
@@ -54,3 +62,18 @@ def test_stress_does_not_mutate_the_panel(pipe_year):
     before = panel.copy()
     run_stress_tests(panel, [2023], methods=["oldest"])
     pd.testing.assert_frame_equal(panel, before)
+
+
+def test_prior_break_corruptions_are_reported(stress):
+    scenarios = (
+        "missing_prior_breaks_05",
+        "missing_prior_breaks_10",
+        "inaccurate_prior_breaks_10",
+    )
+
+    for name in scenarios:
+        scenario = stress["scenarios"][name]
+        assert scenario["affected_rows"] > 0
+
+        result = scenario["methods"]["prior_breaks"]
+        assert 0 <= result[f"capture_at_{KEY}"] <= 1
